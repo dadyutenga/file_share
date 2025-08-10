@@ -135,9 +135,9 @@ class RegisterScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32.0),
-                // Login link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                // Login link - Fixed overflow
+                Wrap(
+                  alignment: WrapAlignment.center,
                   children: [
                     Text(
                       "Already have an account? ",
@@ -145,7 +145,6 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // Navigate back to login screen
                         Navigator.pop(context);
                       },
                       child: const Text(

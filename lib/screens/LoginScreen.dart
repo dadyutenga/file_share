@@ -157,9 +157,9 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32.0),
-                // Register link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                // Register link - Fixed overflow
+                Wrap(
+                  alignment: WrapAlignment.center,
                   children: [
                     Text(
                       "Don't have an account? ",
@@ -167,7 +167,6 @@ class LoginScreen extends StatelessWidget {
                     ),
                     GestureDetector(
                       onTap: () {
-                        // Navigate to register screen using proper route
                         Navigator.pushNamed(context, AppRoutes.register);
                       },
                       child: const Text(

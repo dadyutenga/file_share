@@ -1,9 +1,11 @@
 import 'package:flutter/material.dart';
+import '../screens/LoadingScreen.dart';
 import '../screens/LoginScreen.dart';
 import '../screens/RegisterScreen.dart';
 
 class AppRoutes {
   // Route names
+  static const String loading = '/';
   static const String login = '/login';
   static const String register = '/register';
   static const String home = '/home';
@@ -11,6 +13,8 @@ class AppRoutes {
   // Route generator
   static Route<dynamic> generateRoute(RouteSettings settings) {
     switch (settings.name) {
+      case loading:
+        return MaterialPageRoute(builder: (_) => const LoadingScreen());
       case login:
         return MaterialPageRoute(builder: (_) => const LoginScreen());
       case register:
@@ -25,5 +29,5 @@ class AppRoutes {
   }
 
   // Get initial route
-  static String get initialRoute => login;
+  static String get initialRoute => loading;
 }
