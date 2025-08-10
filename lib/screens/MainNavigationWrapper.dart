@@ -211,7 +211,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         backgroundColor: Colors.transparent,
         elevation: 0,
         title: const Text(
-          'My Files',
+          'FileShare',
           style: TextStyle(
             color: Colors.white,
             fontSize: 24.0,
