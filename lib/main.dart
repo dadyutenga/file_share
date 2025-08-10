@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import 'routes/app_routes.dart';
 
 void main() {
@@ -15,6 +16,16 @@ class MyApp extends StatelessWidget {
       theme: ThemeData(
         colorScheme: ColorScheme.fromSeed(seedColor: const Color(0xFF007AFF)),
         useMaterial3: true,
+        // Set the app bar theme to transparent with light status bar
+        appBarTheme: const AppBarTheme(
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          systemOverlayStyle: SystemUiOverlayStyle(
+            statusBarColor: Colors.transparent,
+            statusBarIconBrightness: Brightness.light,
+            statusBarBrightness: Brightness.dark,
+          ),
+        ),
       ),
       debugShowCheckedModeBanner: false,
       initialRoute: AppRoutes.initialRoute,

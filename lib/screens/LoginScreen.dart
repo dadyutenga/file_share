@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../routes/app_routes.dart';
 
 class LoginScreen extends StatelessWidget {
@@ -6,6 +7,15 @@ class LoginScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    // Set status bar style for this screen
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       body: SafeArea(
@@ -112,28 +122,7 @@ class LoginScreen extends StatelessWidget {
                     ),
                   ),
                 ),
-                const SizedBox(height: 16.0),
-                // Forgot password link
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () {
-                      // Handle forgot password
-                    },
-                    style: TextButton.styleFrom(
-                      padding: const EdgeInsets.symmetric(vertical: 8.0),
-                    ),
-                    child: const Text(
-                      'Forgot your password?',
-                      style: TextStyle(
-                        color: Color(0xFF007AFF),
-                        fontSize: 14.0,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ),
-                ),
-                const SizedBox(height: 24.0),
+                const SizedBox(height: 40.0),
                 // Login button
                 ElevatedButton(
                   onPressed: () {
@@ -157,7 +146,7 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32.0),
-                // Register link - Fixed overflow
+                // Register link - Smooth navigation
                 Wrap(
                   alignment: WrapAlignment.center,
                   children: [

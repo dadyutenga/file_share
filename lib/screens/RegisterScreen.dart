@@ -1,10 +1,20 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 class RegisterScreen extends StatelessWidget {
   const RegisterScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    // Set status bar style for this screen
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
+
     return Scaffold(
       backgroundColor: const Color(0xFF1A1A1A),
       body: SafeArea(
@@ -135,7 +145,7 @@ class RegisterScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 32.0),
-                // Login link - Fixed overflow
+                // Login link - Smooth navigation
                 Wrap(
                   alignment: WrapAlignment.center,
                   children: [

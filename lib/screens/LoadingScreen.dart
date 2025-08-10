@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 import '../routes/app_routes.dart';
 
 class LoadingScreen extends StatefulWidget {
@@ -17,6 +18,15 @@ class _LoadingScreenState extends State<LoadingScreen>
   void initState() {
     super.initState();
 
+    // Set status bar style
+    SystemChrome.setSystemUIOverlayStyle(
+      const SystemUiOverlayStyle(
+        statusBarColor: Colors.transparent,
+        statusBarIconBrightness: Brightness.light,
+        statusBarBrightness: Brightness.dark,
+      ),
+    );
+
     // Initialize animation
     _animationController = AnimationController(
       duration: const Duration(seconds: 2),
@@ -30,7 +40,7 @@ class _LoadingScreenState extends State<LoadingScreen>
     // Start animation
     _animationController.forward();
 
-    // Navigate to login screen after 10 seconds
+    // Navigate to login screen after 5 seconds
     Future.delayed(const Duration(seconds: 5), () {
       if (mounted) {
         Navigator.pushReplacementNamed(context, AppRoutes.login);
