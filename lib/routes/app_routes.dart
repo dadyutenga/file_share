@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import '../screens/LoadingScreen.dart';
 import '../screens/LoginScreen.dart';
 import '../screens/RegisterScreen.dart';
+import '../screens/HomeScreen.dart';
 
 class AppRoutes {
   // Route names
@@ -40,6 +41,8 @@ class AppRoutes {
         return _createRoute(const LoginScreen());
       case register:
         return _createRoute(const RegisterScreen());
+      case home:
+        return _createRoute(const HomeScreen());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(

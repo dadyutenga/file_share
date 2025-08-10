@@ -1,9 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import '../routes/app_routes.dart';
+import '../services/AuthService.dart';
 
-class LoginScreen extends StatelessWidget {
+class LoginScreen extends StatefulWidget {
   const LoginScreen({super.key});
+
+  @override
+  State<LoginScreen> createState() => _LoginScreenState();
+}
+
+class _LoginScreenState extends State<LoginScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleLogin() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Validate inputs
+    final usernameError = AuthService.validateUsername(username);
+    final passwordError = AuthService.validatePassword(password);
+
+    if (usernameError != null) {
+      _showErrorSnackBar(usernameError);
+      return;
+    }
+
+    if (passwordError != null) {
+      _showErrorSnackBar(passwordError);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await AuthService.loginUser(username, password);
+
+      if (response.success && response.data != null) {
+        // Login successful, navigate to home screen
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
+        }
+      } else {
+        _showErrorSnackBar(response.message);
+      }
+    } catch (e) {
+      _showErrorSnackBar('An unexpected error occurred');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -56,13 +133,15 @@ class LoginScreen extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(height: 48.0),
-                // Email address field
+                // Username field
                 TextField(
+                  controller: _usernameController,
+                  enabled: !_isLoading,
                   style: const TextStyle(color: Colors.white, fontSize: 16.0),
                   decoration: InputDecoration(
                     filled: true,
                     fillColor: const Color(0xFF2C2C2E),
-                    hintText: 'Email address',
+                    hintText: 'Username',
                     hintStyle: TextStyle(
                       color: Colors.grey[500],
                       fontSize: 16.0,
@@ -91,6 +170,8 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 16.0),
                 // Password field
                 TextField(
+                  controller: _passwordController,
+                  enabled: !_isLoading,
                   obscureText: true,
                   style: const TextStyle(color: Colors.white, fontSize: 16.0),
                   decoration: InputDecoration(
@@ -125,9 +206,7 @@ class LoginScreen extends StatelessWidget {
                 const SizedBox(height: 40.0),
                 // Login button
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle login
-                  },
+                  onPressed: _isLoading ? null : _handleLogin,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF007AFF),
                     foregroundColor: Colors.white,
@@ -137,13 +216,24 @@ class LoginScreen extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Login',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20.0,
+                          width: 20.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          'Login',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 32.0),
                 // Register link - Smooth navigation
@@ -155,13 +245,17 @@ class LoginScreen extends StatelessWidget {
                       style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.pushNamed(context, AppRoutes.register);
-                      },
-                      child: const Text(
+                      onTap: _isLoading
+                          ? null
+                          : () {
+                              Navigator.pushNamed(context, AppRoutes.register);
+                            },
+                      child: Text(
                         'Register here',
                         style: TextStyle(
-                          color: Color(0xFF007AFF),
+                          color: _isLoading
+                              ? Colors.grey
+                              : const Color(0xFF007AFF),
                           fontSize: 14.0,
                           fontWeight: FontWeight.w600,
                         ),

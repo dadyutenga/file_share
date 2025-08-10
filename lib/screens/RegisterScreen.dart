@@ -1,8 +1,86 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import '../routes/app_routes.dart';
+import '../services/AuthService.dart';
 
-class RegisterScreen extends StatelessWidget {
+class RegisterScreen extends StatefulWidget {
   const RegisterScreen({super.key});
+
+  @override
+  State<RegisterScreen> createState() => _RegisterScreenState();
+}
+
+class _RegisterScreenState extends State<RegisterScreen> {
+  final TextEditingController _usernameController = TextEditingController();
+  final TextEditingController _passwordController = TextEditingController();
+  bool _isLoading = false;
+
+  @override
+  void dispose() {
+    _usernameController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  Future<void> _handleRegister() async {
+    final username = _usernameController.text.trim();
+    final password = _passwordController.text.trim();
+
+    // Validate inputs
+    final usernameError = AuthService.validateUsername(username);
+    final passwordError = AuthService.validatePassword(password);
+
+    if (usernameError != null) {
+      _showErrorSnackBar(usernameError);
+      return;
+    }
+
+    if (passwordError != null) {
+      _showErrorSnackBar(passwordError);
+      return;
+    }
+
+    setState(() {
+      _isLoading = true;
+    });
+
+    try {
+      final response = await AuthService.registerUser(username, password);
+
+      if (response.success && response.data != null) {
+        // Registration successful, navigate to home screen
+        if (mounted) {
+          Navigator.pushReplacementNamed(context, AppRoutes.home);
+        }
+      } else {
+        _showErrorSnackBar(response.message);
+      }
+    } catch (e) {
+      _showErrorSnackBar('An unexpected error occurred');
+    } finally {
+      if (mounted) {
+        setState(() {
+          _isLoading = false;
+        });
+      }
+    }
+  }
+
+  void _showErrorSnackBar(String message) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(message),
+          backgroundColor: Colors.red,
+          behavior: SnackBarBehavior.floating,
+          margin: const EdgeInsets.all(16.0),
+          shape: RoundedRectangleBorder(
+            borderRadius: BorderRadius.circular(12.0),
+          ),
+        ),
+      );
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -57,6 +135,8 @@ class RegisterScreen extends StatelessWidget {
                 const SizedBox(height: 48.0),
                 // Username field
                 TextField(
+                  controller: _usernameController,
+                  enabled: !_isLoading,
                   style: const TextStyle(color: Colors.white, fontSize: 16.0),
                   decoration: InputDecoration(
                     filled: true,
@@ -90,6 +170,8 @@ class RegisterScreen extends StatelessWidget {
                 const SizedBox(height: 16.0),
                 // Password field
                 TextField(
+                  controller: _passwordController,
+                  enabled: !_isLoading,
                   obscureText: true,
                   style: const TextStyle(color: Colors.white, fontSize: 16.0),
                   decoration: InputDecoration(
@@ -124,9 +206,7 @@ class RegisterScreen extends StatelessWidget {
                 const SizedBox(height: 40.0),
                 // Register button
                 ElevatedButton(
-                  onPressed: () {
-                    // Handle registration
-                  },
+                  onPressed: _isLoading ? null : _handleRegister,
                   style: ElevatedButton.styleFrom(
                     backgroundColor: const Color(0xFF007AFF),
                     foregroundColor: Colors.white,
@@ -136,13 +216,24 @@ class RegisterScreen extends StatelessWidget {
                     ),
                     elevation: 0,
                   ),
-                  child: const Text(
-                    'Register',
-                    style: TextStyle(
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w600,
-                    ),
-                  ),
+                  child: _isLoading
+                      ? const SizedBox(
+                          height: 20.0,
+                          width: 20.0,
+                          child: CircularProgressIndicator(
+                            strokeWidth: 2.0,
+                            valueColor: AlwaysStoppedAnimation<Color>(
+                              Colors.white,
+                            ),
+                          ),
+                        )
+                      : const Text(
+                          'Register',
+                          style: TextStyle(
+                            fontSize: 16.0,
+                            fontWeight: FontWeight.w600,
+                          ),
+                        ),
                 ),
                 const SizedBox(height: 32.0),
                 // Login link - Smooth navigation
@@ -154,13 +245,17 @@ class RegisterScreen extends StatelessWidget {
                       style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
                     ),
                     GestureDetector(
-                      onTap: () {
-                        Navigator.pop(context);
-                      },
-                      child: const Text(
+                      onTap: _isLoading
+                          ? null
+                          : () {
+                              Navigator.pop(context);
+                            },
+                      child: Text(
                         'Login here',
                         style: TextStyle(
-                          color: Color(0xFF007AFF),
+                          color: _isLoading
+                              ? Colors.grey
+                              : const Color(0xFF007AFF),
                           fontSize: 14.0,
                           fontWeight: FontWeight.w600,
                         ),
