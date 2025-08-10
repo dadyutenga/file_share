@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:typed_data';
 import 'package:dio/dio.dart';
-import 'package:file_picker/file_picker.dart';
+import 'package:file_picker/file_picker.dart' as file_picker;
 import '../constants/ApiConstant.dart';
 import '../utils/SessionManager.dart';
 import '../models/FileModels.dart';
@@ -11,10 +11,14 @@ class FileManagementService {
 
   // File upload endpoints
   static const String _uploadEndpoint = '/files/upload-api';
-  static const String _chunkedUploadStartEndpoint = '/files/chunked-upload/start';
-  static const String _chunkedUploadChunkEndpoint = '/files/chunked-upload/chunk';
-  static const String _chunkedUploadCompleteEndpoint = '/files/chunked-upload/complete';
-  static const String _chunkedUploadCancelEndpoint = '/files/chunked-upload/cancel';
+  static const String _chunkedUploadStartEndpoint =
+      '/files/chunked-upload/start';
+  static const String _chunkedUploadChunkEndpoint =
+      '/files/chunked-upload/chunk';
+  static const String _chunkedUploadCompleteEndpoint =
+      '/files/chunked-upload/complete';
+  static const String _chunkedUploadCancelEndpoint =
+      '/files/chunked-upload/cancel';
 
   // File management endpoints
   static const String _downloadEndpoint = '/files/download';
@@ -44,12 +48,12 @@ class FileManagementService {
   // ==================== FILE SELECTION ====================
 
   /// Pick a file using file picker
-  static Future<FilePickerResult?> pickFile({
+  static Future<file_picker.FilePickerResult?> pickFile({
     file_picker.FileType type = file_picker.FileType.any,
     List<String>? allowedExtensions,
   }) async {
     try {
-      return await FilePicker.platform.pickFiles(
+      return await file_picker.FilePicker.platform.pickFiles(
         type: type,
         allowedExtensions: allowedExtensions,
         allowMultiple: false,
@@ -214,7 +218,9 @@ class FileManagementService {
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        throw Exception('Complete upload failed: ${e.response!.data['message']}');
+        throw Exception(
+          'Complete upload failed: ${e.response!.data['message']}',
+        );
       } else {
         throw Exception('Network error: ${e.message}');
       }
@@ -303,7 +309,9 @@ class FileManagementService {
 
       for (int i = 0; i < totalChunks; i++) {
         final start = i * chunkSize;
-        final end = (start + chunkSize < fileSize) ? start + chunkSize : fileSize;
+        final end = (start + chunkSize < fileSize)
+            ? start + chunkSize
+            : fileSize;
         final chunkData = fileBytes.sublist(start, end);
 
         await uploadChunk(
@@ -342,10 +350,7 @@ class FileManagementService {
 
       final response = await _dio.get(
         '$_downloadEndpoint/$fileId',
-        options: Options(
-          headers: headers,
-          responseType: ResponseType.bytes,
-        ),
+        options: Options(headers: headers, responseType: ResponseType.bytes),
       );
 
       if (response.statusCode == 200) {
@@ -433,7 +438,9 @@ class FileManagementService {
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        throw Exception('Toggle privacy failed: ${e.response!.data['message']}');
+        throw Exception(
+          'Toggle privacy failed: ${e.response!.data['message']}',
+        );
       } else {
         throw Exception('Network error: ${e.message}');
       }
@@ -468,11 +475,12 @@ class FileManagementService {
 
   // ==================== UTILITY METHODS ====================
 
-  /// Format file size - now uses the helper from FileModels
+  /// Format file size
   static String formatFileSize(int bytes) {
     if (bytes < 1024) return '$bytes B';
     if (bytes < 1024 * 1024) return '${(bytes / 1024).toStringAsFixed(1)} KB';
-    if (bytes < 1024 * 1024 * 1024) return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
+    if (bytes < 1024 * 1024 * 1024)
+      return '${(bytes / (1024 * 1024)).toStringAsFixed(1)} MB';
     return '${(bytes / (1024 * 1024 * 1024)).toStringAsFixed(1)} GB';
   }
 
@@ -559,11 +567,15 @@ class FileManagementService {
       if (response.statusCode == 200) {
         return ApiResponse.success(response.data);
       } else {
-        return ApiResponse.error('Failed to delete files: ${response.data['message']}');
+        return ApiResponse.error(
+          'Failed to delete files: ${response.data['message']}',
+        );
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        return ApiResponse.error('Failed to delete files: ${e.response!.data['message']}');
+        return ApiResponse.error(
+          'Failed to delete files: ${e.response!.data['message']}',
+        );
       } else {
         return ApiResponse.error('Network error: ${e.message}');
       }
@@ -582,191 +594,25 @@ class FileManagementService {
 
       final response = await _dio.post(
         '/files/toggle-multiple-privacy', // Update this endpoint when available
-        data: {
-          'file_ids': fileIds,
-          'is_public': isPublic,
-        },
+        data: {'file_ids': fileIds, 'is_public': isPublic},
         options: Options(headers: headers),
       );
 
       if (response.statusCode == 200) {
         return ApiResponse.success(response.data);
       } else {
-        return ApiResponse.error('Failed to update privacy: ${response.data['message']}');
+        return ApiResponse.error(
+          'Failed to update privacy: ${response.data['message']}',
+        );
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        return ApiResponse.error('Failed to update privacy: ${e.response!.data['message']}');
+        return ApiResponse.error(
+          'Failed to update privacy: ${e.response!.data['message']}',
+        );
       } else {
         return ApiResponse.error('Network error: ${e.message}');
       }
     }
-  }
-}
-
-// ==================== RESPONSE MODELS ====================
-
-class FileUploadResponse {
-  final bool success;
-  final String message;
-  final String fileId;
-  final String downloadUrl;
-  final String previewUrl;
-  final String filename;
-  final int fileSize;
-  final bool isPublic;
-
-  FileUploadResponse({
-    required this.success,
-    required this.message,
-    required this.fileId,
-    required this.downloadUrl,
-    required this.previewUrl,
-    required this.filename,
-    required this.fileSize,
-    required this.isPublic,
-  });
-
-  factory FileUploadResponse.fromJson(Map<String, dynamic> json) {
-    return FileUploadResponse(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
-      fileId: json['file_id'] ?? '',
-      downloadUrl: json['download_url'] ?? '',
-      previewUrl: json['preview_url'] ?? '',
-      filename: json['filename'] ?? '',
-      fileSize: json['file_size'] ?? 0,
-      isPublic: json['is_public'] ?? false,
-    );
-  }
-}
-
-class ChunkedUploadStartResponse {
-  final String uploadId;
-  final String status;
-  final String message;
-  final int chunkSize;
-
-  ChunkedUploadStartResponse({
-    required this.uploadId,
-    required this.status,
-    required this.message,
-    required this.chunkSize,
-  });
-
-  factory ChunkedUploadStartResponse.fromJson(Map<String, dynamic> json) {
-    return ChunkedUploadStartResponse(
-      uploadId: json['upload_id'] ?? '',
-      status: json['status'] ?? '',
-      message: json['message'] ?? '',
-      chunkSize: json['chunk_size'] ?? 0,
-    );
-  }
-}
-
-class ChunkUploadResponse {
-  final int chunkNumber;
-  final String status;
-  final bool uploadComplete;
-  final String message;
-
-  ChunkUploadResponse({
-    required this.chunkNumber,
-    required this.status,
-    required this.uploadComplete,
-    required this.message,
-  });
-
-  factory ChunkUploadResponse.fromJson(Map<String, dynamic> json) {
-    return ChunkUploadResponse(
-      chunkNumber: json['chunk_number'] ?? 0,
-      status: json['status'] ?? '',
-      uploadComplete: json['upload_complete'] ?? false,
-      message: json['message'] ?? '',
-    );
-  }
-}
-
-class FilePreview {
-  final String fileId;
-  final String originalFilename;
-  final int fileSize;
-  final String contentType;
-  final String uploadTime;
-  final int downloadCount;
-  final bool isPublic;
-  final int ttl;
-  final String ownerUsername;
-  final String fileType;
-  final bool previewAvailable;
-
-  FilePreview({
-    required this.fileId,
-    required this.originalFilename,
-    required this.fileSize,
-    required this.contentType,
-    required this.uploadTime,
-    required this.downloadCount,
-    required this.isPublic,
-    required this.ttl,
-    required this.ownerUsername,
-    required this.fileType,
-    required this.previewAvailable,
-  });
-
-  factory FilePreview.fromJson(Map<String, dynamic> json) {
-    return FilePreview(
-      fileId: json['file_id'] ?? '',
-      originalFilename: json['original_filename'] ?? '',
-      fileSize: json['file_size'] ?? 0,
-      contentType: json['content_type'] ?? '',
-      uploadTime: json['upload_time'] ?? '',
-      downloadCount: json['download_count'] ?? 0,
-      isPublic: json['is_public'] ?? false,
-      ttl: json['ttl'] ?? 0,
-      ownerUsername: json['owner_username'] ?? '',
-      fileType: json['file_type'] ?? '',
-      previewAvailable: json['preview_available'] ?? false,
-    );
-  }
-}
-
-class FilePrivacyResponse {
-  final bool success;
-  final String message;
-  final bool isPublic;
-
-  FilePrivacyResponse({
-    required this.success,
-    required this.message,
-    required this.isPublic,
-  });
-
-  factory FilePrivacyResponse.fromJson(Map<String, dynamic> json) {
-    return FilePrivacyResponse(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
-      isPublic: json['is_public'] ?? false,
-    );
-  }
-}
-
-class DeleteAllResponse {
-  final bool success;
-  final String message;
-  final int deletedCount;
-
-  DeleteAllResponse({
-    required this.success,
-    required this.message,
-    required this.deletedCount,
-  });
-
-  factory DeleteAllResponse.fromJson(Map<String, dynamic> json) {
-    return DeleteAllResponse(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
-      deletedCount: json['deleted_count'] ?? 0,
-    );
   }
 }
