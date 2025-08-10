@@ -220,12 +220,6 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
         ),
         actions: [
           IconButton(
-            onPressed: () {
-              // Handle search
-            },
-            icon: const Icon(Icons.search, color: Colors.white, size: 24.0),
-          ),
-          IconButton(
             onPressed: _showUserMenu,
             icon: const Icon(
               Icons.account_circle_outlined,
