@@ -2,6 +2,7 @@ import 'dart:convert';
 import 'package:dio/dio.dart';
 import '../constants/ApiConstant.dart';
 import '../models/AuthModel.dart';
+import '../utils/SessionManager.dart';
 
 class AuthService {
   static final Dio _dio = Dio();
@@ -32,6 +33,11 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final authModel = AuthModel.fromJson(response.data);
+        // Save session data
+        await SessionManager.saveSession(
+          token: authModel.accessToken,
+          username: username,
+        );
         return AuthResponse.success(authModel);
       } else {
         return AuthResponse.error(
@@ -66,6 +72,11 @@ class AuthService {
 
       if (response.statusCode == 200) {
         final authModel = AuthModel.fromJson(response.data);
+        // Save session data
+        await SessionManager.saveSession(
+          token: authModel.accessToken,
+          username: username,
+        );
         return AuthResponse.success(authModel);
       } else {
         return AuthResponse.error(response.data['detail'] ?? 'Login failed');

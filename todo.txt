@@ -1,0 +1,9 @@
+add   status  like  welcome  back  after  login 
+add  a bottom navigation  bar  
+implement  we  the  remaining pages 
+state managemnt  
+the logout
+the  upload  and  preview  
+plus download  of  the  files  
+privacy  toggle  
+the settings  page 

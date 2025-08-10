@@ -3,6 +3,7 @@ import '../screens/LoadingScreen.dart';
 import '../screens/LoginScreen.dart';
 import '../screens/RegisterScreen.dart';
 import '../screens/HomeScreen.dart';
+import '../screens/MainNavigationWrapper.dart';
 
 class AppRoutes {
   // Route names
@@ -42,7 +43,7 @@ class AppRoutes {
       case register:
         return _createRoute(const RegisterScreen());
       case home:
-        return _createRoute(const HomeScreen());
+        return _createRoute(const MainNavigationWrapper());
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
