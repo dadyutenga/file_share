@@ -342,135 +342,120 @@ class FileManagementService {
 
   // ==================== FILE MANAGEMENT ====================
 
-  /// Download file
-  static Future<Uint8List> downloadFile(String fileId) async {
-    try {
-      _initializeDio();
-
-      final headers = await _getAuthHeaders();
-
-      final response = await _dio.get(
-        '$_downloadEndpoint/$fileId',
-        options: Options(headers: headers, responseType: ResponseType.bytes),
-      );
-
-      if (response.statusCode == 200) {
-        return Uint8List.fromList(response.data);
-      } else {
-        throw Exception('Download failed');
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception('Download failed: ${e.response!.statusMessage}');
-      } else {
-        throw Exception('Network error: ${e.message}');
-      }
-    }
-  }
-
-  /// Get file preview/metadata
-  static Future<FilePreview> getFilePreview(String fileId) async {
-    try {
-      _initializeDio();
-
-      final headers = await _getAuthHeaders();
-
-      final response = await _dio.get(
-        '$_previewEndpoint/$fileId',
-        options: Options(headers: headers),
-      );
-
-      if (response.statusCode == 200) {
-        return FilePreview.fromJson(response.data);
-      } else {
-        throw Exception('Preview failed: ${response.data['message']}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception('Preview failed: ${e.response!.data['message']}');
-      } else {
-        throw Exception('Network error: ${e.message}');
-      }
-    }
-  }
-
-  /// Delete file
-  static Future<FileDeleteResponse> deleteFile(String fileId) async {
-    try {
-      _initializeDio();
-
-      final headers = await _getAuthHeaders();
-
-      final response = await _dio.post(
-        '$_deleteEndpoint/$fileId',
-        options: Options(headers: headers),
-      );
-
-      if (response.statusCode == 200) {
-        return FileDeleteResponse.fromJson(response.data);
-      } else {
-        throw Exception('Delete failed: ${response.data['message']}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception('Delete failed: ${e.response!.data['message']}');
-      } else {
-        throw Exception('Network error: ${e.message}');
-      }
-    }
-  }
-
-  /// Toggle file privacy
+  /// Toggle file privacy - FIXED VERSION
   static Future<FilePrivacyResponse> toggleFilePrivacy(String fileId) async {
     try {
-      _initializeDio();
-
-      final headers = await _getAuthHeaders();
+      final token = await SessionManager.getToken();
+      if (token == null) {
+        throw Exception('User not authenticated');
+      }
 
       final response = await _dio.post(
-        '$_togglePrivacyEndpoint/$fileId',
-        options: Options(headers: headers),
+        '${ApiConstants.baseUrl}$_togglePrivacyEndpoint', // Fixed: Use ApiConstants instead of ApiConstant
+        data: {'file_id': fileId},
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
       );
 
       if (response.statusCode == 200) {
         return FilePrivacyResponse.fromJson(response.data);
       } else {
-        throw Exception('Toggle privacy failed: ${response.data['message']}');
-      }
-    } on DioException catch (e) {
-      if (e.response != null) {
         throw Exception(
-          'Toggle privacy failed: ${e.response!.data['message']}',
+          'Failed to toggle file privacy: ${response.statusMessage}',
         );
-      } else {
+      }
+    } catch (e) {
+      if (e is DioException) {
         throw Exception('Network error: ${e.message}');
       }
+      throw Exception('Failed to toggle file privacy: ${e.toString()}');
     }
   }
 
-  /// Delete all user files
-  static Future<DeleteAllResponse> deleteAllFiles() async {
+  /// Download file - FIXED VERSION
+  static Future<Uint8List> downloadFile(String fileId) async {
     try {
-      _initializeDio();
+      final token = await SessionManager.getToken();
+      if (token == null) {
+        throw Exception('User not authenticated');
+      }
 
-      final headers = await _getAuthHeaders();
-
-      final response = await _dio.post(
-        _deleteAllEndpoint,
-        options: Options(headers: headers),
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}$_downloadEndpoint/$fileId', // Fixed: Use ApiConstants
+        options: Options(
+          headers: {'Authorization': 'Bearer $token'},
+          responseType: ResponseType.bytes,
+        ),
       );
 
       if (response.statusCode == 200) {
-        return DeleteAllResponse.fromJson(response.data);
+        return Uint8List.fromList(response.data);
       } else {
-        throw Exception('Delete all failed: ${response.data['message']}');
+        throw Exception('Failed to download file: ${response.statusMessage}');
       }
-    } on DioException catch (e) {
-      if (e.response != null) {
-        throw Exception('Delete all failed: ${e.response!.data['message']}');
-      } else {
+    } catch (e) {
+      if (e is DioException) {
         throw Exception('Network error: ${e.message}');
       }
+      throw Exception('Failed to download file: ${e.toString()}');
+    }
+  }
+
+  /// Get file preview/metadata - FIXED VERSION
+  static Future<FilePreview> getFilePreview(String fileId) async {
+    try {
+      final token = await SessionManager.getToken();
+      if (token == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final response = await _dio.get(
+        '${ApiConstants.baseUrl}$_previewEndpoint/$fileId', // Fixed: Use ApiConstants
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (response.statusCode == 200) {
+        return FilePreview.fromJson(response.data);
+      } else {
+        throw Exception(
+          'Failed to get file preview: ${response.statusMessage}',
+        );
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw Exception('Network error: ${e.message}');
+      }
+      throw Exception('Failed to get file preview: ${e.toString()}');
+    }
+  }
+
+  /// Delete file - FIXED VERSION
+  static Future<FileDeleteResponse> deleteFile(String fileId) async {
+    try {
+      final token = await SessionManager.getToken();
+      if (token == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final response = await _dio.delete(
+        '${ApiConstants.baseUrl}$_deleteEndpoint/$fileId', // Fixed: Use ApiConstants
+        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      );
+
+      if (response.statusCode == 200) {
+        return FileDeleteResponse.fromJson(response.data);
+      } else {
+        throw Exception('Failed to delete file: ${response.statusMessage}');
+      }
+    } catch (e) {
+      if (e is DioException) {
+        throw Exception('Network error: ${e.message}');
+      }
+      throw Exception('Failed to delete file: ${e.toString()}');
     }
   }
 

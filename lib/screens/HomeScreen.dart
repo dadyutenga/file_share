@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:connectivity_plus/connectivity_plus.dart';
 import '../services/file_management_service.dart';
 import '../models/FileModels.dart';
-import 'PreviewScreen.dart'; // Add this import
+import 'PreviewScreen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -30,7 +31,16 @@ class _HomeScreenState extends State<HomeScreen> {
         _errorMessage = null;
       });
 
-      // Fetch user files using correct parameters
+      // Check network connectivity first
+      final connectivityResult = await Connectivity().checkConnectivity();
+      if (connectivityResult == ConnectivityResult.none) {
+        setState(() {
+          _errorMessage = 'Please connect to the internet';
+          _isLoading = false;
+        });
+        return;
+      }
+
       final response = await FileManagementService.getUserFiles(
         limit: 50,
         offset: 0,
@@ -43,23 +53,27 @@ class _HomeScreenState extends State<HomeScreen> {
       });
     } catch (e) {
       setState(() {
-        _errorMessage = 'Failed to load files: ${e.toString()}';
+        if (e.toString().contains('Network') || e.toString().contains('Connection')) {
+          _errorMessage = 'Please connect to the internet';
+        } else {
+          _errorMessage = 'Failed to load files: ${e.toString()}';
+        }
         _isLoading = false;
       });
     }
   }
 
-  // Update this navigation method
   void _openFilePreview(FileItem file) async {
     final result = await Navigator.push(
       context,
-      MaterialPageRoute(builder: (context) => PreviewScreen(file: file)),
+      MaterialPageRoute(
+        builder: (context) => PreviewScreen(file: file),
+      ),
     );
-
-    // Check if file was deleted or modified, then refresh
+    
     if (result != null) {
       if (result == true || result == 'deleted' || result == 'modified') {
-        await _loadUserFiles(); // Force refresh the file list
+        await _loadUserFiles();
       }
     }
   }
@@ -76,7 +90,6 @@ class _HomeScreenState extends State<HomeScreen> {
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            // Welcome message
             Text(
               'Welcome back!',
               style: TextStyle(
@@ -86,13 +99,8 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
             const SizedBox(height: 30.0),
-
-            // Disk Usage Card
             _buildDiskUsageCard(),
-
             const SizedBox(height: 30.0),
-
-            // Files section
             _buildFilesSection(),
           ],
         ),
@@ -101,7 +109,6 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildDiskUsageCard() {
-    // Use cached stats if available, otherwise show loading
     if (_userStats == null) {
       return Container(
         width: double.infinity,
@@ -114,10 +121,7 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             CircularProgressIndicator(color: Color(0xFF007AFF)),
             SizedBox(height: 16.0),
-            Text(
-              'Loading storage info...',
-              style: TextStyle(color: Colors.grey, fontSize: 14.0),
-            ),
+            Text('Loading storage info...', style: TextStyle(color: Colors.grey, fontSize: 14.0)),
           ],
         ),
       );
@@ -138,11 +142,7 @@ class _HomeScreenState extends State<HomeScreen> {
             children: [
               const Text(
                 'Storage Usage',
-                style: TextStyle(
-                  color: Colors.white,
-                  fontSize: 18.0,
-                  fontWeight: FontWeight.w600,
-                ),
+                style: TextStyle(color: Colors.white, fontSize: 18.0, fontWeight: FontWeight.w600),
               ),
               Text(
                 '${_userStats!.totalFiles} files',
@@ -160,9 +160,7 @@ class _HomeScreenState extends State<HomeScreen> {
             value: _userStats!.storagePercentage / 100,
             backgroundColor: Colors.grey[700],
             valueColor: AlwaysStoppedAnimation<Color>(
-              _userStats!.storagePercentage > 80
-                  ? Colors.red
-                  : const Color(0xFF007AFF),
+              _userStats!.storagePercentage > 80 ? Colors.red : const Color(0xFF007AFF),
             ),
           ),
           const SizedBox(height: 8.0),
@@ -190,17 +188,12 @@ class _HomeScreenState extends State<HomeScreen> {
 
     return Column(
       children: [
-        // Files header with view toggle
         Row(
           mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Text(
               'Your Files (${_userFiles.length})',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20.0,
-                fontWeight: FontWeight.w600,
-              ),
+              style: const TextStyle(color: Colors.white, fontSize: 20.0, fontWeight: FontWeight.w600),
             ),
             Row(
               children: [
@@ -208,9 +201,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () => setState(() => _isGridView = false),
                   icon: Icon(
                     Icons.list,
-                    color: !_isGridView
-                        ? const Color(0xFF007AFF)
-                        : Colors.grey[400],
+                    color: !_isGridView ? const Color(0xFF007AFF) : Colors.grey[400],
                     size: 20.0,
                   ),
                 ),
@@ -218,9 +209,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   onPressed: () => setState(() => _isGridView = true),
                   icon: Icon(
                     Icons.grid_view,
-                    color: _isGridView
-                        ? const Color(0xFF007AFF)
-                        : Colors.grey[400],
+                    color: _isGridView ? const Color(0xFF007AFF) : Colors.grey[400],
                     size: 20.0,
                   ),
                 ),
@@ -229,8 +218,6 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 16.0),
-
-        // Files grid/list
         _isGridView ? _buildFilesGrid() : _buildFilesList(),
       ],
     );
@@ -248,10 +235,7 @@ class _HomeScreenState extends State<HomeScreen> {
         children: [
           CircularProgressIndicator(color: Color(0xFF007AFF)),
           SizedBox(height: 16.0),
-          Text(
-            'Loading your files...',
-            style: TextStyle(color: Colors.grey, fontSize: 16.0),
-          ),
+          Text('Loading your files...', style: TextStyle(color: Colors.grey, fontSize: 16.0)),
         ],
       ),
     );
@@ -267,15 +251,15 @@ class _HomeScreenState extends State<HomeScreen> {
       ),
       child: Column(
         children: [
-          Icon(Icons.error_outline, color: Colors.red[400], size: 64.0),
+          Icon(
+            _errorMessage!.contains('internet') ? Icons.wifi_off : Icons.error_outline,
+            color: _errorMessage!.contains('internet') ? Colors.orange[400] : Colors.red[400],
+            size: 64.0,
+          ),
           const SizedBox(height: 16.0),
           Text(
-            'Failed to load files',
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 16.0,
-              fontWeight: FontWeight.w500,
-            ),
+            _errorMessage!.contains('internet') ? 'No Internet Connection' : 'Failed to load files',
+            style: TextStyle(color: Colors.grey[400], fontSize: 16.0, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8.0),
           Text(
@@ -290,7 +274,7 @@ class _HomeScreenState extends State<HomeScreen> {
               backgroundColor: const Color(0xFF007AFF),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Retry'),
+            child: Text(_errorMessage!.contains('internet') ? 'Retry' : 'Retry'),
           ),
         ],
       ),
@@ -311,17 +295,10 @@ class _HomeScreenState extends State<HomeScreen> {
           const SizedBox(height: 16.0),
           Text(
             'No files uploaded yet',
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 16.0,
-              fontWeight: FontWeight.w500,
-            ),
+            style: TextStyle(color: Colors.grey[400], fontSize: 16.0, fontWeight: FontWeight.w500),
           ),
           const SizedBox(height: 8.0),
-          Text(
-            'Your files will appear here',
-            style: TextStyle(color: Colors.grey[500], fontSize: 14.0),
-          ),
+          Text('Your files will appear here', style: TextStyle(color: Colors.grey[500], fontSize: 14.0)),
         ],
       ),
     );
@@ -356,7 +333,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final iconColor = _getFileTypeColor(fileType);
 
     return GestureDetector(
-      onTap: () => _openFilePreview(file), // Add this line for navigation
+      onTap: () => _openFilePreview(file),
       child: Container(
         decoration: BoxDecoration(
           color: const Color(0xFF2C2C2E),
@@ -368,7 +345,6 @@ class _HomeScreenState extends State<HomeScreen> {
             crossAxisAlignment: CrossAxisAlignment.start,
             mainAxisSize: MainAxisSize.min,
             children: [
-              // File icon with status indicators
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
@@ -379,64 +355,34 @@ class _HomeScreenState extends State<HomeScreen> {
                       color: iconColor.withOpacity(0.1),
                       borderRadius: BorderRadius.circular(12.0),
                     ),
-                    child: Icon(
-                      _getFileTypeIconData(fileType),
-                      color: iconColor,
-                      size: 24.0,
-                    ),
+                    child: Icon(_getFileTypeIconData(fileType), color: iconColor, size: 24.0),
                   ),
                   Column(
                     children: [
-                      if (file.isPublic)
-                        Icon(
-                          Icons.public,
-                          color: Colors.green[400],
-                          size: 16.0,
-                        ),
-                      if (file.isExpired)
-                        Icon(
-                          Icons.access_time,
-                          color: Colors.red[400],
-                          size: 16.0,
-                        ),
+                      if (file.isPublic) Icon(Icons.public, color: Colors.green[400], size: 16.0),
+                      if (file.isExpired) Icon(Icons.access_time, color: Colors.red[400], size: 16.0),
                     ],
                   ),
                 ],
               ),
-
               const SizedBox(height: 12.0),
-
-              // File info
               Flexible(
                 child: Text(
                   file.filename,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w500,
-                  ),
+                  style: const TextStyle(color: Colors.white, fontSize: 14.0, fontWeight: FontWeight.w500),
                   maxLines: 2,
                   overflow: TextOverflow.ellipsis,
                 ),
               ),
               const SizedBox(height: 4.0),
-              Text(
-                file.formattedSize,
-                style: TextStyle(color: Colors.grey[400], fontSize: 12.0),
-              ),
+              Text(file.formattedSize, style: TextStyle(color: Colors.grey[400], fontSize: 12.0)),
               const SizedBox(height: 2.0),
               Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
-                  Text(
-                    file.formattedUploadTime,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 11.0),
-                  ),
+                  Text(file.formattedUploadTime, style: TextStyle(color: Colors.grey[500], fontSize: 11.0)),
                   if (file.downloadCount > 0)
-                    Text(
-                      '${file.downloadCount} ↓',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 11.0),
-                    ),
+                    Text('${file.downloadCount} ↓', style: TextStyle(color: Colors.grey[500], fontSize: 11.0)),
                 ],
               ),
             ],
@@ -451,7 +397,7 @@ class _HomeScreenState extends State<HomeScreen> {
     final iconColor = _getFileTypeColor(fileType);
 
     return GestureDetector(
-      onTap: () => _openFilePreview(file), // Add this line for navigation
+      onTap: () => _openFilePreview(file),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12.0),
         padding: const EdgeInsets.all(16.0),
@@ -461,7 +407,6 @@ class _HomeScreenState extends State<HomeScreen> {
         ),
         child: Row(
           children: [
-            // File type icon
             Container(
               width: 48.0,
               height: 48.0,
@@ -469,73 +414,37 @@ class _HomeScreenState extends State<HomeScreen> {
                 color: iconColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12.0),
               ),
-              child: Icon(
-                _getFileTypeIconData(fileType),
-                color: iconColor,
-                size: 24.0,
-              ),
+              child: Icon(_getFileTypeIconData(fileType), color: iconColor, size: 24.0),
             ),
-
             const SizedBox(width: 16.0),
-
-            // File info
             Expanded(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
                     file.filename,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16.0,
-                      fontWeight: FontWeight.w500,
-                    ),
+                    style: const TextStyle(color: Colors.white, fontSize: 16.0, fontWeight: FontWeight.w500),
                     overflow: TextOverflow.ellipsis,
                   ),
                   const SizedBox(height: 4.0),
                   Row(
                     children: [
-                      Text(
-                        file.formattedSize,
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 12.0,
-                        ),
-                      ),
+                      Text(file.formattedSize, style: TextStyle(color: Colors.grey[400], fontSize: 12.0)),
                       const SizedBox(width: 8.0),
-                      Text(
-                        '•',
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 12.0,
-                        ),
-                      ),
+                      Text('•', style: TextStyle(color: Colors.grey[500], fontSize: 12.0)),
                       const SizedBox(width: 8.0),
-                      Text(
-                        file.formattedUploadTime,
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 12.0,
-                        ),
-                      ),
+                      Text(file.formattedUploadTime, style: TextStyle(color: Colors.grey[400], fontSize: 12.0)),
                     ],
                   ),
                 ],
               ),
             ),
-
-            // Status indicators
             Column(
               children: [
-                if (file.isPublic)
-                  Icon(Icons.public, color: Colors.green[400], size: 16.0),
-                if (file.isExpired)
-                  Icon(Icons.access_time, color: Colors.red[400], size: 16.0),
+                if (file.isPublic) Icon(Icons.public, color: Colors.green[400], size: 16.0),
+                if (file.isExpired) Icon(Icons.access_time, color: Colors.red[400], size: 16.0),
                 if (file.downloadCount > 0)
-                  Text(
-                    '${file.downloadCount} ↓',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 10.0),
-                  ),
+                  Text('${file.downloadCount} ↓', style: TextStyle(color: Colors.grey[500], fontSize: 10.0)),
               ],
             ),
           ],
@@ -546,62 +455,39 @@ class _HomeScreenState extends State<HomeScreen> {
 
   FileType _getFileTypeFromCategory(String category) {
     switch (category.toLowerCase()) {
-      case 'image':
-        return FileType.image;
-      case 'video':
-        return FileType.video;
-      case 'document':
-        return FileType.document;
-      case 'audio':
-        return FileType.audio;
-      default:
-        return FileType.unknown;
+      case 'image': return FileType.image;
+      case 'video': return FileType.video;
+      case 'document': return FileType.document;
+      case 'audio': return FileType.audio;
+      default: return FileType.unknown;
     }
   }
 
   Color _getFileTypeColor(FileType fileType) {
     switch (fileType) {
-      case FileType.image:
-        return const Color(0xFF50C878);
-      case FileType.video:
-        return const Color(0xFFB19CD9);
-      case FileType.audio:
-        return const Color(0xFFFFE135);
-      case FileType.pdf:
-        return const Color(0xFF4A90E2);
-      case FileType.document:
-        return const Color(0xFF007AFF);
-      case FileType.spreadsheet:
-        return const Color(0xFF34C759);
-      case FileType.archive:
-        return const Color(0xFFFF9500);
-      case FileType.text:
-        return const Color(0xFF5AC8FA);
-      default:
-        return Colors.grey;
+      case FileType.image: return const Color(0xFF50C878);
+      case FileType.video: return const Color(0xFFB19CD9);
+      case FileType.audio: return const Color(0xFFFFE135);
+      case FileType.pdf: return const Color(0xFF4A90E2);
+      case FileType.document: return const Color(0xFF007AFF);
+      case FileType.spreadsheet: return const Color(0xFF34C759);
+      case FileType.archive: return const Color(0xFFFF9500);
+      case FileType.text: return const Color(0xFF5AC8FA);
+      default: return Colors.grey;
     }
   }
 
   IconData _getFileTypeIconData(FileType fileType) {
     switch (fileType) {
-      case FileType.image:
-        return Icons.image;
-      case FileType.video:
-        return Icons.videocam;
-      case FileType.audio:
-        return Icons.music_note;
-      case FileType.pdf:
-        return Icons.description;
-      case FileType.document:
-        return Icons.description;
-      case FileType.spreadsheet:
-        return Icons.table_chart;
-      case FileType.archive:
-        return Icons.archive;
-      case FileType.text:
-        return Icons.text_snippet;
-      default:
-        return Icons.insert_drive_file;
+      case FileType.image: return Icons.image;
+      case FileType.video: return Icons.videocam;
+      case FileType.audio: return Icons.music_note;
+      case FileType.pdf: return Icons.description;
+      case FileType.document: return Icons.description;
+      case FileType.spreadsheet: return Icons.table_chart;
+      case FileType.archive: return Icons.archive;
+      case FileType.text: return Icons.text_snippet;
+      default: return Icons.insert_drive_file;
     }
   }
 }

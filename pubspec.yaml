@@ -47,6 +47,11 @@ dependencies:
   shimmer: ^3.0.0
   shared_preferences: ^2.2.2
 
+  permission_handler: ^11.0.1  # Add this
+  connectivity_plus: ^5.0.1    # Add this for network check
+
+  device_info_plus: ^10.1.0
+
 dev_dependencies:
   flutter_test:
     sdk: flutter
