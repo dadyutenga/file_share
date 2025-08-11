@@ -597,32 +597,6 @@ class FileOperationError {
   }
 }
 
-// Generic API response wrapper
-class ApiResponse<T> {
-  final bool success;
-  final String message;
-  final T? data;
-  final FileOperationError? error;
-
-  ApiResponse({
-    required this.success,
-    required this.message,
-    this.data,
-    this.error,
-  });
-
-  factory ApiResponse.success(T data, {String message = 'Success'}) {
-    return ApiResponse(success: true, message: message, data: data);
-  }
-
-  factory ApiResponse.error(String message, {FileOperationError? error}) {
-    return ApiResponse(success: false, message: message, error: error);
-  }
-
-  bool get isSuccess => success && error == null;
-  bool get isError => !success || error != null;
-}
-
 // User Files API Response Model
 class UserFilesResponse {
   final bool success;
@@ -706,19 +680,28 @@ class FileItem {
     return FileItem(
       fileId: json['file_id'] ?? '',
       filename: json['filename'] ?? '',
-      fileSize: json['file_size'] ?? 0,
+      fileSize: _toInt(json['file_size']),
       formattedSize: json['formatted_size'] ?? '0 B',
       contentType: json['content_type'],
       fileCategory: json['file_category'] ?? 'other',
       isPublic: json['is_public'] ?? false,
       isExpired: json['is_expired'] ?? false,
       uploadDate: json['upload_date'],
-      ttl: json['ttl'] ?? 0,
+      ttl: _toInt(json['ttl']),
       downloadUrl: json['download_url'] ?? '',
       previewUrl: json['preview_url'] ?? '',
       fileHash: json['file_hash'],
-      downloadCount: json['download_count'] ?? 0,
+      downloadCount: _toInt(json['download_count']),
     );
+  }
+
+  // Helper method to convert dynamic to int
+  static int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -794,14 +777,27 @@ class Pagination {
 
   factory Pagination.fromJson(Map<String, dynamic> json) {
     return Pagination(
-      totalCount: json['total_count'] ?? 0,
-      limit: json['limit'] ?? 100,
-      offset: json['offset'] ?? 0,
+      totalCount: _toInt(json['total_count']),
+      limit: _toInt(json['limit']) == 0 ? 100 : _toInt(json['limit']),
+      offset: _toInt(json['offset']),
       hasNext: json['has_next'] ?? false,
       hasPrevious: json['has_previous'] ?? false,
-      currentPage: json['current_page'] ?? 1,
-      totalPages: json['total_pages'] ?? 1,
+      currentPage: _toInt(json['current_page']) == 0
+          ? 1
+          : _toInt(json['current_page']),
+      totalPages: _toInt(json['total_pages']) == 0
+          ? 1
+          : _toInt(json['total_pages']),
     );
+  }
+
+  // Helper method to convert dynamic to int
+  static int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 
   Map<String, dynamic> toJson() {
@@ -872,22 +868,38 @@ class UserStats {
 
   factory UserStats.fromJson(Map<String, dynamic> json) {
     return UserStats(
-      userId: json['user_id'] ?? 0,
+      userId: _toInt(json['user_id']),
       username: json['username'],
-      storageLimit: json['storage_limit'] ?? 0,
+      storageLimit: _toInt(json['storage_limit']),
       formattedStorageLimit: json['formatted_storage_limit'] ?? '0 B',
-      storageUsed: json['storage_used'] ?? 0,
+      storageUsed: _toInt(json['storage_used']),
       formattedStorageUsed: json['formatted_storage_used'] ?? '0 B',
-      storageAvailable: json['storage_available'] ?? 0,
-      storagePercentage: (json['storage_percentage'] ?? 0.0).toDouble(),
-      dailyDownloadLimit: json['daily_download_limit'] ?? 0,
+      storageAvailable: _toInt(json['storage_available']),
+      storagePercentage: _toDouble(json['storage_percentage']),
+      dailyDownloadLimit: _toInt(json['daily_download_limit']),
       formattedDownloadLimit: json['formatted_download_limit'] ?? '0 B',
-      dailyDownloadsUsed: json['daily_downloads_used'] ?? 0,
-      dailyDownloadPercentage: (json['daily_download_percentage'] ?? 0.0)
-          .toDouble(),
-      totalFiles: json['total_files'] ?? 0,
-      totalDownloads: json['total_downloads'] ?? 0,
+      dailyDownloadsUsed: _toInt(json['daily_downloads_used']),
+      dailyDownloadPercentage: _toDouble(json['daily_download_percentage']),
+      totalFiles: _toInt(json['total_files']),
+      totalDownloads: _toInt(json['total_downloads']),
     );
+  }
+
+  // Helper methods to convert dynamic to int/double
+  static int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
+  }
+
+  static double _toDouble(dynamic value) {
+    if (value == null) return 0.0;
+    if (value is double) return value;
+    if (value is int) return value.toDouble();
+    if (value is String) return double.tryParse(value) ?? 0.0;
+    return 0.0;
   }
 
   Map<String, dynamic> toJson() {
@@ -918,10 +930,39 @@ class UserInfo {
   UserInfo({required this.userId, this.username});
 
   factory UserInfo.fromJson(Map<String, dynamic> json) {
-    return UserInfo(userId: json['user_id'] ?? 0, username: json['username']);
+    return UserInfo(
+      userId: _toInt(json['user_id']),
+      username: json['username'],
+    );
+  }
+
+  // Helper method to convert dynamic to int
+  static int _toInt(dynamic value) {
+    if (value == null) return 0;
+    if (value is int) return value;
+    if (value is double) return value.toInt();
+    if (value is String) return int.tryParse(value) ?? 0;
+    return 0;
   }
 
   Map<String, dynamic> toJson() {
     return {'user_id': userId, 'username': username};
+  }
+}
+
+// Add this helper class if you don't have it already
+class ApiResponse<T> {
+  final bool success;
+  final String message;
+  final T? data;
+
+  ApiResponse({required this.success, required this.message, this.data});
+
+  factory ApiResponse.success(T data) {
+    return ApiResponse(success: true, message: 'Success', data: data);
+  }
+
+  factory ApiResponse.error(String message) {
+    return ApiResponse(success: false, message: message);
   }
 }

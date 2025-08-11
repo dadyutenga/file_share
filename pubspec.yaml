@@ -24,7 +24,7 @@ dependencies:
   flutter_secure_storage: ^9.0.0
 
   # File picking
-  file_picker: ^6.1.1
+  file_picker: ^10.2.4
 
   # Open/download files
   open_filex: ^4.3.2
