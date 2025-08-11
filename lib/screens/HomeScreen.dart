@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import '../services/file_management_service.dart';
 import '../models/FileModels.dart';
+import 'PreviewScreen.dart'; // Add this import
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -45,6 +46,21 @@ class _HomeScreenState extends State<HomeScreen> {
         _errorMessage = 'Failed to load files: ${e.toString()}';
         _isLoading = false;
       });
+    }
+  }
+
+  // Update this navigation method
+  void _openFilePreview(FileItem file) async {
+    final result = await Navigator.push(
+      context,
+      MaterialPageRoute(builder: (context) => PreviewScreen(file: file)),
+    );
+
+    // Check if file was deleted or modified, then refresh
+    if (result != null) {
+      if (result == true || result == 'deleted' || result == 'modified') {
+        await _loadUserFiles(); // Force refresh the file list
+      }
     }
   }
 
@@ -339,85 +355,92 @@ class _HomeScreenState extends State<HomeScreen> {
     final fileType = _getFileTypeFromCategory(file.fileCategory);
     final iconColor = _getFileTypeColor(fileType);
 
-    return Container(
-      decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: Padding(
-        padding: const EdgeInsets.all(16.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            // File icon with status indicators
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Container(
-                  width: 48.0,
-                  height: 48.0,
-                  decoration: BoxDecoration(
-                    color: iconColor.withOpacity(0.1),
-                    borderRadius: BorderRadius.circular(12.0),
+    return GestureDetector(
+      onTap: () => _openFilePreview(file), // Add this line for navigation
+      child: Container(
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C2C2E),
+          borderRadius: BorderRadius.circular(16.0),
+        ),
+        child: Padding(
+          padding: const EdgeInsets.all(16.0),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              // File icon with status indicators
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Container(
+                    width: 48.0,
+                    height: 48.0,
+                    decoration: BoxDecoration(
+                      color: iconColor.withOpacity(0.1),
+                      borderRadius: BorderRadius.circular(12.0),
+                    ),
+                    child: Icon(
+                      _getFileTypeIconData(fileType),
+                      color: iconColor,
+                      size: 24.0,
+                    ),
                   ),
-                  child: Icon(
-                    _getFileTypeIconData(fileType),
-                    color: iconColor,
-                    size: 24.0,
+                  Column(
+                    children: [
+                      if (file.isPublic)
+                        Icon(
+                          Icons.public,
+                          color: Colors.green[400],
+                          size: 16.0,
+                        ),
+                      if (file.isExpired)
+                        Icon(
+                          Icons.access_time,
+                          color: Colors.red[400],
+                          size: 16.0,
+                        ),
+                    ],
                   ),
-                ),
-                Column(
-                  children: [
-                    if (file.isPublic)
-                      Icon(Icons.public, color: Colors.green[400], size: 16.0),
-                    if (file.isExpired)
-                      Icon(
-                        Icons.access_time,
-                        color: Colors.red[400],
-                        size: 16.0,
-                      ),
-                  ],
-                ),
-              ],
-            ),
-
-            const SizedBox(height: 12.0),
-
-            // File info
-            Flexible(
-              child: Text(
-                file.filename,
-                style: const TextStyle(
-                  color: Colors.white,
-                  fontSize: 14.0,
-                  fontWeight: FontWeight.w500,
-                ),
-                maxLines: 2,
-                overflow: TextOverflow.ellipsis,
+                ],
               ),
-            ),
-            const SizedBox(height: 4.0),
-            Text(
-              file.formattedSize,
-              style: TextStyle(color: Colors.grey[400], fontSize: 12.0),
-            ),
-            const SizedBox(height: 2.0),
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  file.formattedUploadTime,
-                  style: TextStyle(color: Colors.grey[500], fontSize: 11.0),
+
+              const SizedBox(height: 12.0),
+
+              // File info
+              Flexible(
+                child: Text(
+                  file.filename,
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 14.0,
+                    fontWeight: FontWeight.w500,
+                  ),
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                 ),
-                if (file.downloadCount > 0)
+              ),
+              const SizedBox(height: 4.0),
+              Text(
+                file.formattedSize,
+                style: TextStyle(color: Colors.grey[400], fontSize: 12.0),
+              ),
+              const SizedBox(height: 2.0),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
                   Text(
-                    '${file.downloadCount} ↓',
+                    file.formattedUploadTime,
                     style: TextStyle(color: Colors.grey[500], fontSize: 11.0),
                   ),
-              ],
-            ),
-          ],
+                  if (file.downloadCount > 0)
+                    Text(
+                      '${file.downloadCount} ↓',
+                      style: TextStyle(color: Colors.grey[500], fontSize: 11.0),
+                    ),
+                ],
+              ),
+            ],
+          ),
         ),
       ),
     );
@@ -427,84 +450,96 @@ class _HomeScreenState extends State<HomeScreen> {
     final fileType = _getFileTypeFromCategory(file.fileCategory);
     final iconColor = _getFileTypeColor(fileType);
 
-    return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      padding: const EdgeInsets.all(16.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(12.0),
-      ),
-      child: Row(
-        children: [
-          // File type icon
-          Container(
-            width: 48.0,
-            height: 48.0,
-            decoration: BoxDecoration(
-              color: iconColor.withOpacity(0.1),
-              borderRadius: BorderRadius.circular(12.0),
+    return GestureDetector(
+      onTap: () => _openFilePreview(file), // Add this line for navigation
+      child: Container(
+        margin: const EdgeInsets.only(bottom: 12.0),
+        padding: const EdgeInsets.all(16.0),
+        decoration: BoxDecoration(
+          color: const Color(0xFF2C2C2E),
+          borderRadius: BorderRadius.circular(12.0),
+        ),
+        child: Row(
+          children: [
+            // File type icon
+            Container(
+              width: 48.0,
+              height: 48.0,
+              decoration: BoxDecoration(
+                color: iconColor.withOpacity(0.1),
+                borderRadius: BorderRadius.circular(12.0),
+              ),
+              child: Icon(
+                _getFileTypeIconData(fileType),
+                color: iconColor,
+                size: 24.0,
+              ),
             ),
-            child: Icon(
-              _getFileTypeIconData(fileType),
-              color: iconColor,
-              size: 24.0,
-            ),
-          ),
 
-          const SizedBox(width: 16.0),
+            const SizedBox(width: 16.0),
 
-          // File info
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  file.filename,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w500,
+            // File info
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    file.filename,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 16.0,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  overflow: TextOverflow.ellipsis,
-                ),
-                const SizedBox(height: 4.0),
-                Row(
-                  children: [
-                    Text(
-                      file.formattedSize,
-                      style: TextStyle(color: Colors.grey[400], fontSize: 12.0),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      '•',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 12.0),
-                    ),
-                    const SizedBox(width: 8.0),
-                    Text(
-                      file.formattedUploadTime,
-                      style: TextStyle(color: Colors.grey[400], fontSize: 12.0),
-                    ),
-                  ],
-                ),
+                  const SizedBox(height: 4.0),
+                  Row(
+                    children: [
+                      Text(
+                        file.formattedSize,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 12.0,
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        '•',
+                        style: TextStyle(
+                          color: Colors.grey[500],
+                          fontSize: 12.0,
+                        ),
+                      ),
+                      const SizedBox(width: 8.0),
+                      Text(
+                        file.formattedUploadTime,
+                        style: TextStyle(
+                          color: Colors.grey[400],
+                          fontSize: 12.0,
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+
+            // Status indicators
+            Column(
+              children: [
+                if (file.isPublic)
+                  Icon(Icons.public, color: Colors.green[400], size: 16.0),
+                if (file.isExpired)
+                  Icon(Icons.access_time, color: Colors.red[400], size: 16.0),
+                if (file.downloadCount > 0)
+                  Text(
+                    '${file.downloadCount} ↓',
+                    style: TextStyle(color: Colors.grey[500], fontSize: 10.0),
+                  ),
               ],
             ),
-          ),
-
-          // Status indicators
-          Column(
-            children: [
-              if (file.isPublic)
-                Icon(Icons.public, color: Colors.green[400], size: 16.0),
-              if (file.isExpired)
-                Icon(Icons.access_time, color: Colors.red[400], size: 16.0),
-              if (file.downloadCount > 0)
-                Text(
-                  '${file.downloadCount} ↓',
-                  style: TextStyle(color: Colors.grey[500], fontSize: 10.0),
-                ),
-            ],
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
