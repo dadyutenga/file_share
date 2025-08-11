@@ -30,19 +30,30 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
   @override
   void initState() {
     super.initState();
-    _startUpload();
-    _startSpeedCalculation();
+    // Use post frame callback to avoid widget lifecycle issues
+    WidgetsBinding.instance.addPostFrameCallback((_) {
+      if (mounted) {
+        _startUpload();
+        _startSpeedCalculation();
+      }
+    });
   }
 
   @override
   void dispose() {
     _speedTimer?.cancel();
+    _isCancelled = true; // Set cancel flag
     super.dispose();
   }
 
   void _startSpeedCalculation() {
     _speedTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
-      if (_isUploading && !_isCancelled) {
+      if (!mounted || _isCancelled) {
+        timer.cancel();
+        return;
+      }
+
+      if (_isUploading) {
         final now = DateTime.now();
         final duration = now.difference(_uploadStartTime).inSeconds;
 
@@ -50,20 +61,22 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
           final speed = (_bytesUploaded - _lastBytesUploaded);
           _lastBytesUploaded = _bytesUploaded;
 
-          setState(() {
-            _uploadSpeed = '${FileManagementService.formatFileSize(speed)}/s';
+          if (mounted) {
+            setState(() {
+              _uploadSpeed = '${FileManagementService.formatFileSize(speed)}/s';
 
-            // Calculate time remaining
-            final totalSize = widget.files.fold<int>(
-              0,
-              (sum, file) => sum + file.size,
-            );
-            final remainingBytes = totalSize - _bytesUploaded;
-            if (speed > 0) {
-              final secondsRemaining = remainingBytes / speed;
-              _timeRemaining = _formatTimeRemaining(secondsRemaining.round());
-            }
-          });
+              // Calculate time remaining
+              final totalSize = widget.files.fold<int>(
+                0,
+                (sum, file) => sum + file.size,
+              );
+              final remainingBytes = totalSize - _bytesUploaded;
+              if (speed > 0) {
+                final secondsRemaining = remainingBytes / speed;
+                _timeRemaining = _formatTimeRemaining(secondsRemaining.round());
+              }
+            });
+          }
         }
       }
     });
@@ -76,22 +89,27 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
   }
 
   Future<void> _startUpload() async {
+    if (!mounted || _isCancelled) return;
+
     for (int i = 0; i < widget.files.length; i++) {
-      if (_isCancelled) break;
+      if (_isCancelled || !mounted) break;
 
       final file = widget.files[i];
-      setState(() {
-        _currentFileIndex = i;
-        _currentFileName = file.name;
-        _currentFileProgress = 0.0;
-        file.uploadStatus = UploadStatus.uploading;
-      });
+
+      if (mounted) {
+        setState(() {
+          _currentFileIndex = i;
+          _currentFileName = file.name;
+          _currentFileProgress = 0.0;
+          file.uploadStatus = UploadStatus.uploading;
+        });
+      }
 
       try {
         await FileManagementService.uploadFile(
           file.file,
           onProgress: (progress) {
-            if (!_isCancelled) {
+            if (!_isCancelled && mounted) {
               setState(() {
                 _currentFileProgress = progress;
                 file.progress = progress;
@@ -118,14 +136,14 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
           },
         );
 
-        if (!_isCancelled) {
+        if (!_isCancelled && mounted) {
           setState(() {
             file.uploadStatus = UploadStatus.completed;
             file.progress = 1.0;
           });
         }
       } catch (e) {
-        if (!_isCancelled) {
+        if (!_isCancelled && mounted) {
           setState(() {
             file.uploadStatus = UploadStatus.failed;
           });
@@ -133,7 +151,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
       }
     }
 
-    if (!_isCancelled) {
+    if (!_isCancelled && mounted) {
       setState(() {
         _isUploading = false;
         _overallProgress = 1.0;
@@ -141,7 +159,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
 
       // Auto navigate back after 2 seconds
       Timer(const Duration(seconds: 2), () {
-        if (mounted) {
+        if (mounted && !_isCancelled) {
           Navigator.pop(context, true);
         }
       });
@@ -149,10 +167,12 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
   }
 
   void _cancelUpload() {
-    setState(() {
-      _isCancelled = true;
-      _isUploading = false;
-    });
+    if (mounted) {
+      setState(() {
+        _isCancelled = true;
+        _isUploading = false;
+      });
+    }
 
     // Mark remaining files as failed
     for (var file in widget.files) {
@@ -164,7 +184,9 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
   }
 
   void _viewFiles() {
-    Navigator.pop(context, true);
+    if (mounted) {
+      Navigator.pop(context, true);
+    }
   }
 
   @override
@@ -421,6 +443,8 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
   }
 
   void _showCancelDialog() {
+    if (!mounted) return;
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
