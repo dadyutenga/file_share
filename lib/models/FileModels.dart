@@ -622,3 +622,306 @@ class ApiResponse<T> {
   bool get isSuccess => success && error == null;
   bool get isError => !success || error != null;
 }
+
+// User Files API Response Model
+class UserFilesResponse {
+  final bool success;
+  final List<FileItem> files;
+  final Pagination pagination;
+  final Filters filters;
+  final UserStats userStats;
+  final UserInfo userInfo;
+
+  UserFilesResponse({
+    required this.success,
+    required this.files,
+    required this.pagination,
+    required this.filters,
+    required this.userStats,
+    required this.userInfo,
+  });
+
+  factory UserFilesResponse.fromJson(Map<String, dynamic> json) {
+    return UserFilesResponse(
+      success: json['success'] ?? false,
+      files:
+          (json['files'] as List?)
+              ?.map((file) => FileItem.fromJson(file))
+              .toList() ??
+          [],
+      pagination: Pagination.fromJson(json['pagination'] ?? {}),
+      filters: Filters.fromJson(json['filters'] ?? {}),
+      userStats: UserStats.fromJson(json['user_stats'] ?? {}),
+      userInfo: UserInfo.fromJson(json['user_info'] ?? {}),
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'success': success,
+      'files': files.map((file) => file.toJson()).toList(),
+      'pagination': pagination.toJson(),
+      'filters': filters.toJson(),
+      'user_stats': userStats.toJson(),
+      'user_info': userInfo.toJson(),
+    };
+  }
+}
+
+// File Item Model (from the new API)
+class FileItem {
+  final String fileId;
+  final String filename;
+  final int fileSize;
+  final String formattedSize;
+  final String? contentType;
+  final String fileCategory;
+  final bool isPublic;
+  final bool isExpired;
+  final String? uploadDate;
+  final int ttl;
+  final String downloadUrl;
+  final String previewUrl;
+  final String? fileHash;
+  final int downloadCount;
+
+  FileItem({
+    required this.fileId,
+    required this.filename,
+    required this.fileSize,
+    required this.formattedSize,
+    this.contentType,
+    required this.fileCategory,
+    required this.isPublic,
+    required this.isExpired,
+    this.uploadDate,
+    required this.ttl,
+    required this.downloadUrl,
+    required this.previewUrl,
+    this.fileHash,
+    required this.downloadCount,
+  });
+
+  factory FileItem.fromJson(Map<String, dynamic> json) {
+    return FileItem(
+      fileId: json['file_id'] ?? '',
+      filename: json['filename'] ?? '',
+      fileSize: json['file_size'] ?? 0,
+      formattedSize: json['formatted_size'] ?? '0 B',
+      contentType: json['content_type'],
+      fileCategory: json['file_category'] ?? 'other',
+      isPublic: json['is_public'] ?? false,
+      isExpired: json['is_expired'] ?? false,
+      uploadDate: json['upload_date'],
+      ttl: json['ttl'] ?? 0,
+      downloadUrl: json['download_url'] ?? '',
+      previewUrl: json['preview_url'] ?? '',
+      fileHash: json['file_hash'],
+      downloadCount: json['download_count'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'file_id': fileId,
+      'filename': filename,
+      'file_size': fileSize,
+      'formatted_size': formattedSize,
+      'content_type': contentType,
+      'file_category': fileCategory,
+      'is_public': isPublic,
+      'is_expired': isExpired,
+      'upload_date': uploadDate,
+      'ttl': ttl,
+      'download_url': downloadUrl,
+      'preview_url': previewUrl,
+      'file_hash': fileHash,
+      'download_count': downloadCount,
+    };
+  }
+
+  // Helper methods
+  DateTime? get uploadDateTime {
+    try {
+      return uploadDate != null ? DateTime.parse(uploadDate!) : null;
+    } catch (e) {
+      return null;
+    }
+  }
+
+  String get formattedUploadTime {
+    final dateTime = uploadDateTime;
+    if (dateTime == null) return 'Unknown';
+
+    final now = DateTime.now();
+    final difference = now.difference(dateTime);
+
+    if (difference.inDays > 0) {
+      return '${difference.inDays} day${difference.inDays > 1 ? 's' : ''} ago';
+    } else if (difference.inHours > 0) {
+      return '${difference.inHours} hour${difference.inHours > 1 ? 's' : ''} ago';
+    } else if (difference.inMinutes > 0) {
+      return '${difference.inMinutes} minute${difference.inMinutes > 1 ? 's' : ''} ago';
+    } else {
+      return 'Just now';
+    }
+  }
+
+  String get fileExtension {
+    return filename.split('.').last.toLowerCase();
+  }
+}
+
+// Pagination Model
+class Pagination {
+  final int totalCount;
+  final int limit;
+  final int offset;
+  final bool hasNext;
+  final bool hasPrevious;
+  final int currentPage;
+  final int totalPages;
+
+  Pagination({
+    required this.totalCount,
+    required this.limit,
+    required this.offset,
+    required this.hasNext,
+    required this.hasPrevious,
+    required this.currentPage,
+    required this.totalPages,
+  });
+
+  factory Pagination.fromJson(Map<String, dynamic> json) {
+    return Pagination(
+      totalCount: json['total_count'] ?? 0,
+      limit: json['limit'] ?? 100,
+      offset: json['offset'] ?? 0,
+      hasNext: json['has_next'] ?? false,
+      hasPrevious: json['has_previous'] ?? false,
+      currentPage: json['current_page'] ?? 1,
+      totalPages: json['total_pages'] ?? 1,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'total_count': totalCount,
+      'limit': limit,
+      'offset': offset,
+      'has_next': hasNext,
+      'has_previous': hasPrevious,
+      'current_page': currentPage,
+      'total_pages': totalPages,
+    };
+  }
+}
+
+// Filters Model
+class Filters {
+  final String? fileType;
+  final String? searchQuery;
+
+  Filters({this.fileType, this.searchQuery});
+
+  factory Filters.fromJson(Map<String, dynamic> json) {
+    return Filters(
+      fileType: json['file_type'],
+      searchQuery: json['search_query'],
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'file_type': fileType, 'search_query': searchQuery};
+  }
+}
+
+// User Stats Model (for caching and settings page)
+class UserStats {
+  final int userId;
+  final String? username;
+  final int storageLimit;
+  final String formattedStorageLimit;
+  final int storageUsed;
+  final String formattedStorageUsed;
+  final int storageAvailable;
+  final double storagePercentage;
+  final int dailyDownloadLimit;
+  final String formattedDownloadLimit;
+  final int dailyDownloadsUsed;
+  final double dailyDownloadPercentage;
+  final int totalFiles;
+  final int totalDownloads;
+
+  UserStats({
+    required this.userId,
+    this.username,
+    required this.storageLimit,
+    required this.formattedStorageLimit,
+    required this.storageUsed,
+    required this.formattedStorageUsed,
+    required this.storageAvailable,
+    required this.storagePercentage,
+    required this.dailyDownloadLimit,
+    required this.formattedDownloadLimit,
+    required this.dailyDownloadsUsed,
+    required this.dailyDownloadPercentage,
+    required this.totalFiles,
+    required this.totalDownloads,
+  });
+
+  factory UserStats.fromJson(Map<String, dynamic> json) {
+    return UserStats(
+      userId: json['user_id'] ?? 0,
+      username: json['username'],
+      storageLimit: json['storage_limit'] ?? 0,
+      formattedStorageLimit: json['formatted_storage_limit'] ?? '0 B',
+      storageUsed: json['storage_used'] ?? 0,
+      formattedStorageUsed: json['formatted_storage_used'] ?? '0 B',
+      storageAvailable: json['storage_available'] ?? 0,
+      storagePercentage: (json['storage_percentage'] ?? 0.0).toDouble(),
+      dailyDownloadLimit: json['daily_download_limit'] ?? 0,
+      formattedDownloadLimit: json['formatted_download_limit'] ?? '0 B',
+      dailyDownloadsUsed: json['daily_downloads_used'] ?? 0,
+      dailyDownloadPercentage: (json['daily_download_percentage'] ?? 0.0)
+          .toDouble(),
+      totalFiles: json['total_files'] ?? 0,
+      totalDownloads: json['total_downloads'] ?? 0,
+    );
+  }
+
+  Map<String, dynamic> toJson() {
+    return {
+      'user_id': userId,
+      'username': username,
+      'storage_limit': storageLimit,
+      'formatted_storage_limit': formattedStorageLimit,
+      'storage_used': storageUsed,
+      'formatted_storage_used': formattedStorageUsed,
+      'storage_available': storageAvailable,
+      'storage_percentage': storagePercentage,
+      'daily_download_limit': dailyDownloadLimit,
+      'formatted_download_limit': formattedDownloadLimit,
+      'daily_downloads_used': dailyDownloadsUsed,
+      'daily_download_percentage': dailyDownloadPercentage,
+      'total_files': totalFiles,
+      'total_downloads': totalDownloads,
+    };
+  }
+}
+
+// User Info Model
+class UserInfo {
+  final int userId;
+  final String? username;
+
+  UserInfo({required this.userId, this.username});
+
+  factory UserInfo.fromJson(Map<String, dynamic> json) {
+    return UserInfo(userId: json['user_id'] ?? 0, username: json['username']);
+  }
+
+  Map<String, dynamic> toJson() {
+    return {'user_id': userId, 'username': username};
+  }
+}

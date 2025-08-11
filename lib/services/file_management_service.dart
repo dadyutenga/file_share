@@ -5,6 +5,7 @@ import 'package:file_picker/file_picker.dart' as file_picker;
 import '../constants/ApiConstant.dart';
 import '../utils/SessionManager.dart';
 import '../models/FileModels.dart';
+import 'cache_manager.dart'; // Add this import
 
 class FileManagementService {
   static final Dio _dio = Dio();
@@ -506,12 +507,12 @@ class FileManagementService {
     return FileTypeHelper.getFileTypeDisplayName(fileType);
   }
 
-  // ==================== FILE LISTING (Future Implementation) ====================
+  // ==================== FILE LISTING ====================
 
-  /// Get user files list (when implemented in backend)
-  static Future<FileListResponse> getUserFiles({
-    int page = 1,
-    int pageSize = 20,
+  /// Get user files using the new API endpoint
+  static Future<UserFilesResponse> getUserFiles({
+    int limit = 100,
+    int offset = 0,
     String? fileType,
     String? searchQuery,
   }) async {
@@ -520,31 +521,78 @@ class FileManagementService {
 
       final headers = await _getAuthHeaders();
 
-      final queryParams = <String, dynamic>{
-        'page': page.toString(),
-        'page_size': pageSize.toString(),
-        if (fileType != null) 'file_type': fileType,
-        if (searchQuery != null) 'search': searchQuery,
-      };
+      final queryParams = <String, dynamic>{'limit': limit, 'offset': offset};
+
+      if (fileType != null) queryParams['file_type'] = fileType;
+      if (searchQuery != null && searchQuery.isNotEmpty) {
+        queryParams['search_query'] = searchQuery;
+      }
 
       final response = await _dio.get(
-        '/files/list', // Update this endpoint when available
+        '/files/api/user-files', // Correct endpoint
         queryParameters: queryParams,
         options: Options(headers: headers),
       );
 
       if (response.statusCode == 200) {
-        return FileListResponse.fromJson(response.data);
+        final userFilesResponse = UserFilesResponse.fromJson(response.data);
+
+        // Cache the user stats and info
+        await CacheManager.cacheUserStats(userFilesResponse.userStats);
+        await CacheManager.cacheUserInfo(userFilesResponse.userInfo);
+
+        return userFilesResponse;
       } else {
-        throw Exception('Failed to get files: ${response.data['message']}');
+        throw Exception('Failed to get files: ${response.statusMessage}');
       }
     } on DioException catch (e) {
       if (e.response != null) {
-        throw Exception('Failed to get files: ${e.response!.data['message']}');
+        throw Exception('Failed to get files: ${e.response!.statusMessage}');
       } else {
         throw Exception('Network error: ${e.message}');
       }
+    } catch (e) {
+      throw Exception('Failed to parse response: ${e.toString()}');
     }
+  }
+
+  /// Get files by category
+  static Future<UserFilesResponse> getFilesByCategory(
+    String category, {
+    int limit = 100,
+    int offset = 0,
+  }) async {
+    return await getUserFiles(limit: limit, offset: offset, fileType: category);
+  }
+
+  /// Search files
+  static Future<UserFilesResponse> searchFiles(
+    String query, {
+    int limit = 100,
+    int offset = 0,
+    String? fileType,
+  }) async {
+    return await getUserFiles(
+      limit: limit,
+      offset: offset,
+      fileType: fileType,
+      searchQuery: query,
+    );
+  }
+
+  /// Load next page
+  static Future<UserFilesResponse> loadNextPage(
+    UserFilesResponse currentResponse,
+  ) async {
+    if (!currentResponse.pagination.hasNext) {
+      return currentResponse; // No more pages
+    }
+
+    return await getUserFiles(
+      limit: currentResponse.pagination.limit,
+      offset:
+          currentResponse.pagination.offset + currentResponse.pagination.limit,
+    );
   }
 
   // ==================== BATCH OPERATIONS ====================
