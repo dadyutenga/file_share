@@ -43,7 +43,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
     });
 
     try {
-      final fileData = await FileManagementService.downloadFile(widget.file.fileId);
+      final fileData = await FileManagementService.downloadFile(
+        widget.file.fileId,
+      );
       setState(() {
         _fileData = fileData;
         _isLoading = false;
@@ -67,14 +69,18 @@ class _PreviewScreenState extends State<PreviewScreen> {
         throw Exception('Storage permission denied');
       }
 
-      final fileData = await FileManagementService.downloadFile(widget.file.fileId);
+      final fileData = await FileManagementService.downloadFile(
+        widget.file.fileId,
+      );
 
       Directory? downloadsDirectory;
       if (Platform.isAndroid) {
         downloadsDirectory = Directory('/storage/emulated/0/Download');
         if (!await downloadsDirectory.exists()) {
           downloadsDirectory = await getExternalStorageDirectory();
-          downloadsDirectory = Directory('${downloadsDirectory!.path}/Download');
+          downloadsDirectory = Directory(
+            '${downloadsDirectory!.path}/Download',
+          );
         }
       } else {
         downloadsDirectory = await getApplicationDocumentsDirectory();
@@ -134,10 +140,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
   Future<void> _shareFile() async {
     try {
       // Use the public URL or download URL - whatever exists in your FileItem
-      final shareUrl = widget.file.downloadUrl.isNotEmpty 
-          ? widget.file.downloadUrl 
+      final shareUrl = widget.file.downloadUrl.isNotEmpty
+          ? widget.file.downloadUrl
           : 'Check out this file: ${widget.file.filename}';
-          
+
       await Share.share(
         shareUrl,
         subject: 'Shared file: ${widget.file.filename}',
@@ -161,19 +167,24 @@ class _PreviewScreenState extends State<PreviewScreen> {
     });
 
     try {
-      final response = await FileManagementService.deleteFile(widget.file.fileId);
+      final response = await FileManagementService.deleteFile(
+        widget.file.fileId,
+      );
 
-      if (response.success && mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('File deleted: ${widget.file.filename}'),
-            backgroundColor: Colors.green,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
-        Navigator.pop(context, 'deleted');
+      // Check if delete was successful
+      if (response.success) {
+        if (mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('File deleted: ${widget.file.filename}'),
+              backgroundColor: Colors.green,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          Navigator.pop(context, 'deleted');
+        }
       } else {
-        throw Exception(response.message ?? 'Delete failed');
+        throw Exception(response.message);
       }
     } catch (e) {
       if (mounted) {
@@ -186,9 +197,11 @@ class _PreviewScreenState extends State<PreviewScreen> {
         );
       }
     } finally {
-      setState(() {
-        _isDeleting = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isDeleting = false;
+        });
+      }
     }
   }
 
@@ -288,7 +301,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
             children: [
               CircularProgressIndicator(color: Color(0xFF007AFF)),
               SizedBox(height: 16),
-              Text('Loading preview...', style: TextStyle(color: Colors.grey, fontSize: 16)),
+              Text(
+                'Loading preview...',
+                style: TextStyle(color: Colors.grey, fontSize: 16),
+              ),
             ],
           ),
         ),
@@ -304,9 +320,16 @@ class _PreviewScreenState extends State<PreviewScreen> {
             children: [
               Icon(Icons.error_outline, color: Colors.red[400], size: 64),
               const SizedBox(height: 16),
-              Text('Preview not available', style: TextStyle(color: Colors.grey[400], fontSize: 16)),
+              Text(
+                'Preview not available',
+                style: TextStyle(color: Colors.grey[400], fontSize: 16),
+              ),
               const SizedBox(height: 8),
-              Text(_errorMessage!, style: TextStyle(color: Colors.grey[500], fontSize: 14), textAlign: TextAlign.center),
+              Text(
+                _errorMessage!,
+                style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                textAlign: TextAlign.center,
+              ),
             ],
           ),
         ),
@@ -341,7 +364,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
                 children: [
                   Icon(Icons.broken_image, color: Colors.grey, size: 64),
                   SizedBox(height: 16),
-                  Text('Could not load image', style: TextStyle(color: Colors.grey, fontSize: 16)),
+                  Text(
+                    'Could not load image',
+                    style: TextStyle(color: Colors.grey, fontSize: 16),
+                  ),
                 ],
               ),
             ),
@@ -404,7 +430,11 @@ class _PreviewScreenState extends State<PreviewScreen> {
                 children: [
                   Text(
                     widget.file.filename,
-                    style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
+                    ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
                   ),
@@ -412,20 +442,33 @@ class _PreviewScreenState extends State<PreviewScreen> {
                   Row(
                     children: [
                       Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        padding: const EdgeInsets.symmetric(
+                          horizontal: 8,
+                          vertical: 4,
+                        ),
                         decoration: BoxDecoration(
                           color: const Color(0xFFB19CD9),
                           borderRadius: BorderRadius.circular(4),
                         ),
                         child: Text(
                           _getVideoFormat(),
-                          style: const TextStyle(color: Colors.white, fontSize: 12, fontWeight: FontWeight.w500),
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
                         ),
                       ),
                       const SizedBox(width: 12),
-                      Text(widget.file.formattedSize, style: TextStyle(color: Colors.grey[300], fontSize: 14)),
+                      Text(
+                        widget.file.formattedSize,
+                        style: TextStyle(color: Colors.grey[300], fontSize: 14),
+                      ),
                       const Spacer(),
-                      Text('Video File', style: TextStyle(color: Colors.grey[300], fontSize: 12)),
+                      Text(
+                        'Video File',
+                        style: TextStyle(color: Colors.grey[300], fontSize: 12),
+                      ),
                     ],
                   ),
                 ],
@@ -463,9 +506,19 @@ class _PreviewScreenState extends State<PreviewScreen> {
               child: Icon(iconData, color: iconColor, size: 50),
             ),
             const SizedBox(height: 20),
-            Text(typeName, style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w500)),
+            Text(
+              typeName,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 18,
+                fontWeight: FontWeight.w500,
+              ),
+            ),
             const SizedBox(height: 8),
-            Text('Download to view this file', style: TextStyle(color: Colors.grey[400], fontSize: 14)),
+            Text(
+              'Download to view this file',
+              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            ),
           ],
         ),
       ),
@@ -487,7 +540,11 @@ class _PreviewScreenState extends State<PreviewScreen> {
               Expanded(
                 child: Text(
                   widget.file.filename,
-                  style: const TextStyle(color: Colors.white, fontSize: 18, fontWeight: FontWeight.w600),
+                  style: const TextStyle(
+                    color: Colors.white,
+                    fontSize: 18,
+                    fontWeight: FontWeight.w600,
+                  ),
                 ),
               ),
             ],
@@ -504,15 +561,34 @@ class _PreviewScreenState extends State<PreviewScreen> {
           const SizedBox(height: 16),
           Row(
             children: [
-              Expanded(child: _buildInfoItem('Size', widget.file.formattedSize)),
-              Expanded(child: _buildInfoItem('Type', _getFileTypeDisplayName(_getFileTypeFromCategory(widget.file.fileCategory)))),
+              Expanded(
+                child: _buildInfoItem('Size', widget.file.formattedSize),
+              ),
+              Expanded(
+                child: _buildInfoItem(
+                  'Type',
+                  _getFileTypeDisplayName(
+                    _getFileTypeFromCategory(widget.file.fileCategory),
+                  ),
+                ),
+              ),
             ],
           ),
           const SizedBox(height: 12),
           Row(
             children: [
-              Expanded(child: _buildInfoItem('Format', widget.file.filename.split('.').last.toUpperCase())),
-              Expanded(child: _buildInfoItem('Downloads', '${widget.file.downloadCount}')),
+              Expanded(
+                child: _buildInfoItem(
+                  'Format',
+                  widget.file.filename.split('.').last.toUpperCase(),
+                ),
+              ),
+              Expanded(
+                child: _buildInfoItem(
+                  'Downloads',
+                  '${widget.file.downloadCount}',
+                ),
+              ),
             ],
           ),
         ],
@@ -534,7 +610,14 @@ class _PreviewScreenState extends State<PreviewScreen> {
       children: [
         Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
         const SizedBox(height: 4),
-        Text(value, style: const TextStyle(color: Colors.white, fontSize: 14, fontWeight: FontWeight.w500)),
+        Text(
+          value,
+          style: const TextStyle(
+            color: Colors.white,
+            fontSize: 14,
+            fontWeight: FontWeight.w500,
+          ),
+        ),
       ],
     );
   }
@@ -591,7 +674,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
     bool isPrimary = false,
     Color? backgroundColor,
   }) {
-    final bgColor = backgroundColor ?? (isPrimary ? const Color(0xFF007AFF) : const Color(0xFF2C2C2E));
+    final bgColor =
+        backgroundColor ??
+        (isPrimary ? const Color(0xFF007AFF) : const Color(0xFF2C2C2E));
 
     return ElevatedButton(
       onPressed: onPressed,
@@ -599,21 +684,32 @@ class _PreviewScreenState extends State<PreviewScreen> {
         backgroundColor: bgColor,
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(vertical: 16.0),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12.0)),
+        shape: RoundedRectangleBorder(
+          borderRadius: BorderRadius.circular(12.0),
+        ),
         elevation: 0,
       ),
       child: isLoading
           ? const SizedBox(
               width: 20,
               height: 20,
-              child: CircularProgressIndicator(strokeWidth: 2, valueColor: AlwaysStoppedAnimation<Color>(Colors.white)),
+              child: CircularProgressIndicator(
+                strokeWidth: 2,
+                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+              ),
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Icon(icon, size: 20),
                 const SizedBox(width: 8),
-                Text(label, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500)),
+                Text(
+                  label,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                  ),
+                ),
               ],
             ),
     );
@@ -624,7 +720,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
       context: context,
       builder: (context) => AlertDialog(
         backgroundColor: const Color(0xFF2C2C2E),
-        title: const Text('File Details', style: TextStyle(color: Colors.white)),
+        title: const Text(
+          'File Details',
+          style: TextStyle(color: Colors.white),
+        ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -643,7 +742,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Close', style: TextStyle(color: Color(0xFF007AFF))),
+            child: const Text(
+              'Close',
+              style: TextStyle(color: Color(0xFF007AFF)),
+            ),
           ),
         ],
       ),
@@ -656,8 +758,19 @@ class _PreviewScreenState extends State<PreviewScreen> {
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          SizedBox(width: 80, child: Text('$label:', style: TextStyle(color: Colors.grey[400], fontSize: 14))),
-          Expanded(child: Text(value, style: const TextStyle(color: Colors.white, fontSize: 14))),
+          SizedBox(
+            width: 80,
+            child: Text(
+              '$label:',
+              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            ),
+          ),
+          Expanded(
+            child: Text(
+              value,
+              style: const TextStyle(color: Colors.white, fontSize: 14),
+            ),
+          ),
         ],
       ),
     );
@@ -666,53 +779,85 @@ class _PreviewScreenState extends State<PreviewScreen> {
   // Helper methods
   FileType _getFileTypeFromCategory(String category) {
     switch (category.toLowerCase()) {
-      case 'image': return FileType.image;
-      case 'video': return FileType.video;
-      case 'document': return FileType.document;
-      case 'audio': return FileType.audio;
-      default: return FileType.unknown;
+      case 'image':
+        return FileType.image;
+      case 'video':
+        return FileType.video;
+      case 'document':
+        return FileType.document;
+      case 'audio':
+        return FileType.audio;
+      default:
+        return FileType.unknown;
     }
   }
 
   Color _getFileTypeColor(FileType fileType) {
     switch (fileType) {
-      case FileType.image: return const Color(0xFF50C878);
-      case FileType.video: return const Color(0xFFB19CD9);
-      case FileType.audio: return const Color(0xFFFFE135);
-      case FileType.pdf: return const Color(0xFF4A90E2);
-      case FileType.document: return const Color(0xFF007AFF);
-      case FileType.spreadsheet: return const Color(0xFF34C759);
-      case FileType.archive: return const Color(0xFFFF9500);
-      case FileType.text: return const Color(0xFF5AC8FA);
-      default: return Colors.grey;
+      case FileType.image:
+        return const Color(0xFF50C878);
+      case FileType.video:
+        return const Color(0xFFB19CD9);
+      case FileType.audio:
+        return const Color(0xFFFFE135);
+      case FileType.pdf:
+        return const Color(0xFF4A90E2);
+      case FileType.document:
+        return const Color(0xFF007AFF);
+      case FileType.spreadsheet:
+        return const Color(0xFF34C759);
+      case FileType.archive:
+        return const Color(0xFFFF9500);
+      case FileType.text:
+        return const Color(0xFF5AC8FA);
+      default:
+        return Colors.grey;
     }
   }
 
   IconData _getFileTypeIconData(FileType fileType) {
     switch (fileType) {
-      case FileType.image: return Icons.image;
-      case FileType.video: return Icons.videocam;
-      case FileType.audio: return Icons.music_note;
-      case FileType.pdf: return Icons.description;
-      case FileType.document: return Icons.description;
-      case FileType.spreadsheet: return Icons.table_chart;
-      case FileType.archive: return Icons.archive;
-      case FileType.text: return Icons.text_snippet;
-      default: return Icons.insert_drive_file;
+      case FileType.image:
+        return Icons.image;
+      case FileType.video:
+        return Icons.videocam;
+      case FileType.audio:
+        return Icons.music_note;
+      case FileType.pdf:
+        return Icons.description;
+      case FileType.document:
+        return Icons.description;
+      case FileType.spreadsheet:
+        return Icons.table_chart;
+      case FileType.archive:
+        return Icons.archive;
+      case FileType.text:
+        return Icons.text_snippet;
+      default:
+        return Icons.insert_drive_file;
     }
   }
 
   String _getFileTypeDisplayName(FileType fileType) {
     switch (fileType) {
-      case FileType.image: return 'Image';
-      case FileType.video: return 'Video';
-      case FileType.audio: return 'Audio';
-      case FileType.pdf: return 'PDF';
-      case FileType.document: return 'Document';
-      case FileType.spreadsheet: return 'Spreadsheet';
-      case FileType.archive: return 'Archive';
-      case FileType.text: return 'Text';
-      default: return 'File';
+      case FileType.image:
+        return 'Image';
+      case FileType.video:
+        return 'Video';
+      case FileType.audio:
+        return 'Audio';
+      case FileType.pdf:
+        return 'PDF';
+      case FileType.document:
+        return 'Document';
+      case FileType.spreadsheet:
+        return 'Spreadsheet';
+      case FileType.archive:
+        return 'Archive';
+      case FileType.text:
+        return 'Text';
+      default:
+        return 'File';
     }
   }
 }

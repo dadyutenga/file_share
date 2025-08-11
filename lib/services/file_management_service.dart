@@ -351,8 +351,7 @@ class FileManagementService {
       }
 
       final response = await _dio.post(
-        '${ApiConstants.baseUrl}$_togglePrivacyEndpoint', // Fixed: Use ApiConstants instead of ApiConstant
-        data: {'file_id': fileId},
+        '${ApiConstants.baseUrl}/files/toggle-privacy/$fileId', // Fixed URL
         options: Options(
           headers: {
             'Authorization': 'Bearer $token',
@@ -433,7 +432,7 @@ class FileManagementService {
     }
   }
 
-  /// Delete file - FIXED VERSION
+  /// Delete file - FIXED VERSION (using correct endpoint from docs)
   static Future<FileDeleteResponse> deleteFile(String fileId) async {
     try {
       final token = await SessionManager.getToken();
@@ -441,19 +440,49 @@ class FileManagementService {
         throw Exception('User not authenticated');
       }
 
-      final response = await _dio.delete(
-        '${ApiConstants.baseUrl}$_deleteEndpoint/$fileId', // Fixed: Use ApiConstants
-        options: Options(headers: {'Authorization': 'Bearer $token'}),
+      // Use the CORRECT endpoint from your documentation
+      final response = await _dio.post(
+        '${ApiConstants.baseUrl}/files/delete/$fileId', // CORRECT endpoint
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
       );
 
+      // Handle 200 OK response
       if (response.statusCode == 200) {
-        return FileDeleteResponse.fromJson(response.data);
+        return FileDeleteResponse(
+          success: true,
+          message: 'File deleted successfully',
+          fileId: fileId,
+        );
       } else {
         throw Exception('Failed to delete file: ${response.statusMessage}');
       }
     } catch (e) {
       if (e is DioException) {
-        throw Exception('Network error: ${e.message}');
+        // Handle 302 redirect as success (if it happens)
+        if (e.response?.statusCode == 302) {
+          return FileDeleteResponse(
+            success: true,
+            message: 'File deleted successfully',
+            fileId: fileId,
+          );
+        }
+
+        // Handle other error response formats
+        if (e.response?.data is Map<String, dynamic>) {
+          final errorData = e.response!.data;
+          throw Exception(
+            errorData['message'] ?? errorData['detail'] ?? 'Delete failed',
+          );
+        } else if (e.response?.data is String) {
+          throw Exception(e.response!.data);
+        } else {
+          throw Exception('Network error: ${e.message}');
+        }
       }
       throw Exception('Failed to delete file: ${e.toString()}');
     }

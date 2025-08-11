@@ -277,17 +277,23 @@ class DeleteAllResponse {
   }
 }
 
-// File delete response model
+// File delete response model - According to your API docs
 class FileDeleteResponse {
   final bool success;
   final String message;
+  final String? fileId;
 
-  FileDeleteResponse({required this.success, required this.message});
+  FileDeleteResponse({
+    required this.success,
+    required this.message,
+    this.fileId,
+  });
 
   factory FileDeleteResponse.fromJson(Map<String, dynamic> json) {
     return FileDeleteResponse(
-      success: json['success'] ?? false,
-      message: json['message'] ?? '',
+      success: json['success'] == true || json['success'] == 'true',
+      message: json['message']?.toString() ?? 'File deleted successfully',
+      fileId: null, // API doesn't return file_id in delete response
     );
   }
 
