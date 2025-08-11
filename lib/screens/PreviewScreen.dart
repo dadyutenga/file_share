@@ -23,12 +23,28 @@ class _PreviewScreenState extends State<PreviewScreen> {
   String? _errorMessage;
   Uint8List? _fileData;
   late bool _isPublic;
+  FilePreview? _filePreview; // Add this to get proper file metadata
 
   @override
   void initState() {
     super.initState();
     _isPublic = widget.file.isPublic;
     _loadFilePreview();
+    _loadFileMetadata(); // Load additional metadata
+  }
+
+  Future<void> _loadFileMetadata() async {
+    try {
+      final preview = await FileManagementService.getFilePreview(
+        widget.file.fileId,
+      );
+      setState(() {
+        _filePreview = preview;
+      });
+    } catch (e) {
+      // Metadata loading failed, continue with basic info
+      print('Failed to load file metadata: $e');
+    }
   }
 
   Future<void> _loadFilePreview() async {
@@ -57,7 +73,8 @@ class _PreviewScreenState extends State<PreviewScreen> {
 
   bool _shouldLoadPreview() {
     final fileType = _getFileTypeFromCategory(widget.file.fileCategory);
-    return fileType == FileType.image || fileType == FileType.video;
+    return fileType ==
+        FileType.image; // Only auto-load images, not videos (they're large)
   }
 
   Future<void> _downloadFile() async {
@@ -107,7 +124,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
 
   Future<void> _shareFile() async {
     try {
-      // For now, share the download URL
       await Share.share(
         widget.file.downloadUrl,
         subject: 'Shared file: ${widget.file.filename}',
@@ -169,6 +185,101 @@ class _PreviewScreenState extends State<PreviewScreen> {
     }
   }
 
+  // Add method to play/preview video
+  Future<void> _previewVideo() async {
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
+
+    try {
+      // For video preview, we can either:
+      // 1. Download and play locally
+      // 2. Use the preview URL if available
+      // 3. Show video player with streaming URL
+
+      if (widget.file.previewUrl.isNotEmpty) {
+        // Use preview URL for streaming
+        _showVideoPlayer(widget.file.previewUrl);
+      } else {
+        // Download for local playback
+        final fileData = await FileManagementService.downloadFile(
+          widget.file.fileId,
+        );
+        setState(() {
+          _fileData = fileData;
+          _isLoading = false;
+        });
+
+        // Save temporarily and play
+        final tempDir = await getTemporaryDirectory();
+        final tempFile = File('${tempDir.path}/${widget.file.filename}');
+        await tempFile.writeAsBytes(fileData);
+
+        _showVideoPlayer(tempFile.path);
+      }
+    } catch (e) {
+      setState(() {
+        _errorMessage = 'Failed to load video: ${e.toString()}';
+        _isLoading = false;
+      });
+    }
+  }
+
+  void _showVideoPlayer(String videoPath) {
+    // For now, show a dialog that video preview is ready
+    // You can integrate video_player package here later
+    showDialog(
+      context: context,
+      builder: (context) => AlertDialog(
+        backgroundColor: const Color(0xFF2C2C2E),
+        title: const Text('Video Ready', style: TextStyle(color: Colors.white)),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            const Icon(
+              Icons.play_circle_fill,
+              color: Color(0xFF007AFF),
+              size: 64,
+            ),
+            const SizedBox(height: 16),
+            Text(
+              'Video is ready to play\n${widget.file.filename}',
+              style: TextStyle(color: Colors.grey[400]),
+              textAlign: TextAlign.center,
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'Size: ${widget.file.formattedSize}',
+              style: TextStyle(color: Colors.grey[500], fontSize: 12),
+            ),
+          ],
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context),
+            child: const Text(
+              'Close',
+              style: TextStyle(color: Color(0xFF007AFF)),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              Navigator.pop(context);
+              // Here you would open the actual video player
+              // For now, just download the file
+              _downloadFile();
+            },
+            child: const Text(
+              'Download & Play',
+              style: TextStyle(color: Color(0xFF007AFF)),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -210,10 +321,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.more_vert, color: Colors.white),
-          onPressed: () {
-            // Show more options menu
-            _showMoreOptions();
-          },
+          onPressed: _showMoreOptions,
         ),
       ],
     );
@@ -323,86 +431,168 @@ class _PreviewScreenState extends State<PreviewScreen> {
   }
 
   Widget _buildVideoPreview() {
-    return Container(
-      height: 300,
-      child: Stack(
-        alignment: Alignment.center,
-        children: [
-          // Video thumbnail placeholder
-          Container(
-            width: double.infinity,
-            height: double.infinity,
-            decoration: BoxDecoration(
-              gradient: LinearGradient(
-                begin: Alignment.topCenter,
-                end: Alignment.bottomCenter,
-                colors: [
-                  Colors.black.withOpacity(0.3),
-                  Colors.black.withOpacity(0.7),
-                ],
-              ),
-            ),
-            child: const Icon(Icons.videocam, color: Colors.white, size: 64),
-          ),
-
-          // Play button overlay
-          Container(
-            width: 80,
-            height: 80,
-            decoration: BoxDecoration(
-              color: Colors.black.withOpacity(0.7),
-              shape: BoxShape.circle,
-            ),
-            child: const Icon(Icons.play_arrow, color: Colors.white, size: 40),
-          ),
-
-          // Video info overlay
-          Positioned(
-            bottom: 16,
-            left: 16,
-            right: 16,
-            child: Container(
-              padding: const EdgeInsets.all(12),
+    return GestureDetector(
+      onTap: _previewVideo,
+      child: Container(
+        height: 300,
+        child: Stack(
+          alignment: Alignment.center,
+          children: [
+            // Video thumbnail background
+            Container(
+              width: double.infinity,
+              height: double.infinity,
               decoration: BoxDecoration(
-                color: Colors.black.withOpacity(0.7),
-                borderRadius: BorderRadius.circular(8),
+                gradient: LinearGradient(
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                  colors: [
+                    const Color(0xFFB19CD9).withOpacity(0.3),
+                    const Color(0xFF6A4C93).withOpacity(0.7),
+                  ],
+                ),
               ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    widget.file.filename,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w500,
-                    ),
-                    maxLines: 1,
-                    overflow: TextOverflow.ellipsis,
-                  ),
-                  const SizedBox(height: 4),
-                  Row(
-                    children: [
-                      const Icon(Icons.videocam, color: Colors.grey, size: 16),
-                      const SizedBox(width: 8),
-                      Text(
-                        'MP4 Video',
-                        style: TextStyle(color: Colors.grey[400], fontSize: 14),
-                      ),
-                      const Spacer(),
-                      Text(
-                        widget.file.formattedSize,
-                        style: TextStyle(color: Colors.grey[400], fontSize: 14),
-                      ),
-                    ],
+              child: const Icon(Icons.movie, color: Colors.white, size: 80),
+            ),
+
+            // Play button overlay
+            Container(
+              width: 100,
+              height: 100,
+              decoration: BoxDecoration(
+                color: Colors.black.withOpacity(0.8),
+                shape: BoxShape.circle,
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.3),
+                    blurRadius: 10,
+                    spreadRadius: 2,
                   ),
                 ],
               ),
+              child: const Icon(
+                Icons.play_arrow,
+                color: Colors.white,
+                size: 50,
+              ),
             ),
-          ),
-        ],
+
+            // Video info overlay
+            Positioned(
+              bottom: 0,
+              left: 0,
+              right: 0,
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  gradient: LinearGradient(
+                    begin: Alignment.topCenter,
+                    end: Alignment.bottomCenter,
+                    colors: [Colors.transparent, Colors.black.withOpacity(0.8)],
+                  ),
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      widget.file.filename,
+                      style: const TextStyle(
+                        color: Colors.white,
+                        fontSize: 18,
+                        fontWeight: FontWeight.w600,
+                      ),
+                      maxLines: 2,
+                      overflow: TextOverflow.ellipsis,
+                    ),
+                    const SizedBox(height: 8),
+                    Row(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.symmetric(
+                            horizontal: 8,
+                            vertical: 4,
+                          ),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFB19CD9),
+                            borderRadius: BorderRadius.circular(4),
+                          ),
+                          child: Text(
+                            _getVideoFormat(),
+                            style: const TextStyle(
+                              color: Colors.white,
+                              fontSize: 12,
+                              fontWeight: FontWeight.w500,
+                            ),
+                          ),
+                        ),
+                        const SizedBox(width: 12),
+                        Text(
+                          widget.file.formattedSize,
+                          style: TextStyle(
+                            color: Colors.grey[300],
+                            fontSize: 14,
+                          ),
+                        ),
+                        const Spacer(),
+                        Text(
+                          widget.file.formattedSize,
+                          style: TextStyle(
+                            color: Colors.grey[300],
+                            fontSize: 14,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+            ),
+
+            // Tap to play hint
+            Positioned(
+              top: 16,
+              right: 16,
+              child: Container(
+                padding: const EdgeInsets.symmetric(
+                  horizontal: 12,
+                  vertical: 6,
+                ),
+                decoration: BoxDecoration(
+                  color: Colors.black.withOpacity(0.7),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: const Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    Icon(Icons.touch_app, color: Colors.white, size: 16),
+                    SizedBox(width: 4),
+                    Text(
+                      'Tap to preview',
+                      style: TextStyle(color: Colors.white, fontSize: 12),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
       ),
     );
+  }
+
+  String _getVideoFormat() {
+    final extension = widget.file.filename.split('.').last.toUpperCase();
+    return extension;
+  }
+
+  String _getVideoDuration() {
+    // Since we don't have duration metadata in the FileItem model,
+    // return a placeholder or extract from file metadata if available
+    if (_filePreview != null && _filePreview!.metadata != null) {
+      // If you have duration in metadata, extract it here
+      return _filePreview!.metadata!['duration'] ?? 'Unknown';
+    }
+    return 'Unknown';
   }
 
   Widget _buildGenericPreview(FileType fileType) {
@@ -477,7 +667,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
           Row(
             children: [
               Text(
-                'Uploaded on ${widget.file.formattedUploadTime}',
+                'Uploaded ${widget.file.formattedUploadTime}',
                 style: TextStyle(color: Colors.grey[400], fontSize: 14),
               ),
             ],
@@ -508,10 +698,8 @@ class _PreviewScreenState extends State<PreviewScreen> {
             children: [
               Expanded(
                 child: _buildInfoItem(
-                  'Resolution',
-                  widget.file.contentType?.contains('video') == true
-                      ? '1920×1080'
-                      : '—',
+                  'Format',
+                  widget.file.filename.split('.').last.toUpperCase(),
                 ),
               ),
               Expanded(
@@ -796,10 +984,8 @@ class _PreviewScreenState extends State<PreviewScreen> {
             behavior: SnackBarBehavior.floating,
           ),
         );
-        Navigator.pop(
-          context,
-          true,
-        ); // Return true to indicate file was deleted
+        // Return 'deleted' to trigger refresh in HomeScreen
+        Navigator.pop(context, 'deleted');
       }
     } catch (e) {
       if (mounted) {
@@ -814,7 +1000,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
     }
   }
 
-  // Helper methods
+  // Helper methods (same as before)
   FileType _getFileTypeFromCategory(String category) {
     switch (category.toLowerCase()) {
       case 'image':
