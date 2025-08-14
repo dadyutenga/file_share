@@ -103,81 +103,9 @@ class _RecentsScreenState extends State<RecentsScreen>
         padding: const EdgeInsets.all(20.0),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            const Text(
-              'Recent Files',
-              style: TextStyle(
-                color: Colors.white,
-                fontSize: 24.0,
-                fontWeight: FontWeight.w700,
-              ),
-            ),
-            const SizedBox(height: 8.0),
-            Text(
-              'All your uploaded files',
-              style: TextStyle(
-                color: Colors.grey[400],
-                fontSize: 16.0,
-                fontWeight: FontWeight.w400,
-              ),
-            ),
-            const SizedBox(height: 30.0),
-            if (_userStats != null) _buildQuickStats(),
-            const SizedBox(height: 30.0),
-            _buildFilesSection(),
-          ],
+          children: [_buildFilesSection()],
         ),
       ),
-    );
-  }
-
-  Widget _buildQuickStats() {
-    return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(20.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceAround,
-        children: [
-          _buildStatItem(
-            'Total Files',
-            '${_userStats!.totalFiles}',
-            Icons.insert_drive_file,
-          ),
-          _buildStatItem(
-            'Storage Used',
-            _userStats!.formattedStorageUsed,
-            Icons.storage,
-          ),
-          _buildStatItem(
-            'Available',
-            _userStats!.formattedStorageLimit,
-            Icons.cloud,
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildStatItem(String label, String value, IconData icon) {
-    return Column(
-      children: [
-        Icon(icon, color: const Color(0xFF007AFF), size: 24.0),
-        const SizedBox(height: 8.0),
-        Text(
-          value,
-          style: const TextStyle(
-            color: Colors.white,
-            fontSize: 16.0,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        const SizedBox(height: 4.0),
-        Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 12.0)),
-      ],
     );
   }
 
@@ -252,7 +180,7 @@ class _RecentsScreenState extends State<RecentsScreen>
           CircularProgressIndicator(color: Color(0xFF007AFF)),
           SizedBox(height: 16.0),
           Text(
-            'Loading your files...',
+            'Loading files...',
             style: TextStyle(color: Colors.grey, fontSize: 16.0),
           ),
         ],
