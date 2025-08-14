@@ -160,7 +160,8 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
       // Auto navigate back after 2 seconds
       Timer(const Duration(seconds: 2), () {
         if (mounted && !_isCancelled) {
-          Navigator.pop(context, true);
+          Navigator.of(context).popUntil((route) => route.isFirst);
+          // The tab controller should handle switching to recents automatically
         }
       });
     }
@@ -185,7 +186,8 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
 
   void _viewFiles() {
     if (mounted) {
-      Navigator.pop(context, true);
+      // Navigate back to main screen and trigger recents refresh
+      Navigator.of(context).popUntil((route) => route.isFirst);
     }
   }
 
@@ -217,7 +219,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
           if (_isUploading) {
             _showCancelDialog();
           } else {
-            Navigator.pop(context, true);
+            Navigator.of(context).popUntil((route) => route.isFirst);
           }
         },
       ),

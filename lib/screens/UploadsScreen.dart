@@ -15,6 +15,7 @@ class UploadsScreen extends StatefulWidget {
 class _UploadsScreenState extends State<UploadsScreen> {
   List<SelectedFile> _selectedFiles = [];
   bool _isSelecting = false;
+  bool _isProcessing = false;
 
   @override
   Widget build(BuildContext context) {
@@ -31,6 +32,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
                 children: [
                   _buildFileDropZone(),
                   const SizedBox(height: 30),
+                  if (_isProcessing) _buildProcessingIndicator(),
                   _buildSelectedFilesSection(),
                 ],
               ),
@@ -57,7 +59,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
       actions: [
         IconButton(
           icon: const Icon(Icons.add, color: Colors.white, size: 28),
-          onPressed: _selectFiles,
+          onPressed: _isSelecting || _isProcessing ? null : _selectFiles,
         ),
       ],
     );
@@ -65,7 +67,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
 
   Widget _buildFileDropZone() {
     return GestureDetector(
-      onTap: _selectFiles,
+      onTap: _isSelecting || _isProcessing ? null : _selectFiles,
       child: Container(
         width: double.infinity,
         height: 200,
@@ -73,7 +75,9 @@ class _UploadsScreenState extends State<UploadsScreen> {
           color: const Color(0xFF2C2C2E),
           borderRadius: BorderRadius.circular(16),
           border: Border.all(
-            color: Colors.grey[600]!,
+            color: _isSelecting || _isProcessing
+                ? Colors.grey[700]!
+                : Colors.grey[600]!,
             width: 2,
             style: BorderStyle.solid,
           ),
@@ -81,35 +85,73 @@ class _UploadsScreenState extends State<UploadsScreen> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Container(
-              width: 80,
-              height: 80,
-              decoration: BoxDecoration(
-                color: Colors.grey[700],
-                shape: BoxShape.circle,
+            if (_isSelecting || _isProcessing)
+              const CircularProgressIndicator(color: Color(0xFF007AFF))
+            else
+              Container(
+                width: 80,
+                height: 80,
+                decoration: BoxDecoration(
+                  color: Colors.grey[700],
+                  shape: BoxShape.circle,
+                ),
+                child: const Icon(
+                  Icons.cloud_upload_outlined,
+                  color: Colors.white,
+                  size: 40,
+                ),
               ),
-              child: const Icon(
-                Icons.cloud_upload_outlined,
-                color: Colors.white,
-                size: 40,
-              ),
-            ),
             const SizedBox(height: 16),
-            const Text(
-              'Tap to select files',
+            Text(
+              _isSelecting
+                  ? 'Selecting files...'
+                  : _isProcessing
+                  ? 'Processing files...'
+                  : 'Tap to select files',
               style: TextStyle(
-                color: Colors.white,
+                color: _isSelecting || _isProcessing
+                    ? Colors.grey[400]
+                    : Colors.white,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
             ),
             const SizedBox(height: 8),
-            Text(
-              'Photos, Videos, Documents, etc.',
-              style: TextStyle(color: Colors.grey[400], fontSize: 14),
-            ),
+            if (!_isSelecting && !_isProcessing)
+              Text(
+                'Photos, Videos, Documents, etc.',
+                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+              ),
           ],
         ),
+      ),
+    );
+  }
+
+  Widget _buildProcessingIndicator() {
+    return Container(
+      width: double.infinity,
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: const Color(0xFF2C2C2E),
+        borderRadius: BorderRadius.circular(12),
+      ),
+      child: Row(
+        children: [
+          const SizedBox(
+            width: 20,
+            height: 20,
+            child: CircularProgressIndicator(
+              strokeWidth: 2,
+              color: Color(0xFF007AFF),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Text(
+            'Processing large files...',
+            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+          ),
+        ],
       ),
     );
   }
@@ -244,31 +286,62 @@ class _UploadsScreenState extends State<UploadsScreen> {
         ),
       ),
       child: SafeArea(
-        child: SizedBox(
-          width: double.infinity,
-          child: ElevatedButton(
-            onPressed: _canUpload() ? _uploadAllFiles : null,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF007AFF),
-              foregroundColor: Colors.white,
-              padding: const EdgeInsets.symmetric(vertical: 16),
-              shape: RoundedRectangleBorder(
-                borderRadius: BorderRadius.circular(12),
+        child: Column(
+          children: [
+            if (_selectedFiles.isNotEmpty) ...[
+              // Show total size warning if needed
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Total: ${_formatFileSize(_getTotalSize())}',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  ),
+                  if (_getTotalSize() > 100 * 1024 * 1024) // 100MB
+                    Text(
+                      'Large files may take time',
+                      style: TextStyle(color: Colors.orange[400], fontSize: 12),
+                    ),
+                ],
               ),
-              elevation: 0,
+              const SizedBox(height: 12),
+            ],
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: _canUpload() ? _uploadAllFiles : null,
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFF007AFF),
+                  foregroundColor: Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  elevation: 0,
+                ),
+                child: Text(
+                  _isProcessing
+                      ? 'Processing...'
+                      : 'Upload All (${_selectedFiles.length} files)',
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w600,
+                  ),
+                ),
+              ),
             ),
-            child: Text(
-              'Upload All (${_selectedFiles.length} files)',
-              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
-            ),
-          ),
+          ],
         ),
       ),
     );
   }
 
+  int _getTotalSize() {
+    return _selectedFiles.fold<int>(0, (sum, file) => sum + file.size);
+  }
+
   Future<void> _selectFiles() async {
-    if (_isSelecting) return;
+    if (_isSelecting || _isProcessing) return;
 
     setState(() {
       _isSelecting = true;
@@ -281,57 +354,100 @@ class _UploadsScreenState extends State<UploadsScreen> {
       );
 
       if (result != null && result.files.isNotEmpty) {
+        setState(() {
+          _isSelecting = false;
+          _isProcessing = true;
+        });
+
+        // Process files one by one to avoid memory issues
         for (final platformFile in result.files) {
           if (platformFile.path != null) {
-            final file = File(platformFile.path!);
-            final fileSize = await file.length();
+            try {
+              final file = File(platformFile.path!);
 
-            // Check file size limit (500MB)
-            const maxFileSize = 500 * 1024 * 1024; // 500MB in bytes
-            if (fileSize > maxFileSize) {
+              // Check if file exists and is readable
+              if (!await file.exists()) {
+                if (mounted) {
+                  _showErrorSnackBar(
+                    'File ${platformFile.name} not found or inaccessible',
+                  );
+                }
+                continue;
+              }
+
+              final fileSize = await file.length();
+
+              // Check file size limit (500MB)
+              const maxFileSize = 500 * 1024 * 1024; // 500MB in bytes
+              if (fileSize > maxFileSize) {
+                if (mounted) {
+                  _showErrorSnackBar(
+                    'File ${platformFile.name} is too large. Maximum size is 500MB.',
+                    isWarning: true,
+                  );
+                }
+                continue;
+              }
+
+              // Check available storage (rough estimate)
+              if (fileSize == 0) {
+                if (mounted) {
+                  _showErrorSnackBar(
+                    'File ${platformFile.name} appears to be empty',
+                  );
+                }
+                continue;
+              }
+
+              final selectedFile = SelectedFile(
+                file: file,
+                name: platformFile.name,
+                size: fileSize,
+                fileType: _getFileTypeFromName(platformFile.name),
+                uploadStatus: UploadStatus.pending,
+              );
+
               if (mounted) {
-                ScaffoldMessenger.of(context).showSnackBar(
-                  SnackBar(
-                    content: Text(
-                      'File ${platformFile.name} is too large. Maximum size is 500MB.',
-                    ),
-                    backgroundColor: Colors.orange,
-                    behavior: SnackBarBehavior.floating,
-                  ),
+                setState(() {
+                  _selectedFiles.add(selectedFile);
+                });
+              }
+
+              // Add a small delay to prevent UI blocking
+              await Future.delayed(const Duration(milliseconds: 50));
+            } catch (e) {
+              if (mounted) {
+                _showErrorSnackBar(
+                  'Error processing ${platformFile.name}: ${e.toString()}',
                 );
               }
-              continue;
             }
-
-            final selectedFile = SelectedFile(
-              file: file,
-              name: platformFile.name,
-              size: fileSize,
-              fileType: _getFileTypeFromName(platformFile.name),
-              uploadStatus: UploadStatus.pending,
-            );
-
-            setState(() {
-              _selectedFiles.add(selectedFile);
-            });
           }
         }
       }
     } catch (e) {
       if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(
-            content: Text('Failed to select files: ${e.toString()}'),
-            backgroundColor: Colors.red,
-            behavior: SnackBarBehavior.floating,
-          ),
-        );
+        _showErrorSnackBar('Failed to select files: ${e.toString()}');
       }
     } finally {
-      setState(() {
-        _isSelecting = false;
-      });
+      if (mounted) {
+        setState(() {
+          _isSelecting = false;
+          _isProcessing = false;
+        });
+      }
     }
+  }
+
+  void _showErrorSnackBar(String message, {bool isWarning = false}) {
+    ScaffoldMessenger.of(context).showSnackBar(
+      SnackBar(
+        content: Text(message),
+        backgroundColor: isWarning ? Colors.orange : Colors.red,
+        behavior: SnackBarBehavior.floating,
+        duration: const Duration(seconds: 4),
+      ),
+    );
   }
 
   void _removeFile(int index) {
@@ -342,6 +458,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
 
   bool _canUpload() {
     return _selectedFiles.isNotEmpty &&
+        !_isProcessing &&
         _selectedFiles.any((file) => file.uploadStatus == UploadStatus.pending);
   }
 
@@ -351,6 +468,14 @@ class _UploadsScreenState extends State<UploadsScreen> {
         .toList();
 
     if (pendingFiles.isEmpty) return;
+
+    // Show confirmation for large uploads
+    final totalSize = pendingFiles.fold<int>(0, (sum, file) => sum + file.size);
+    if (totalSize > 100 * 1024 * 1024) {
+      // 100MB
+      final confirmed = await _showLargeUploadDialog(totalSize);
+      if (!confirmed) return;
+    }
 
     // Navigate to upload progress screen
     final result = await Navigator.push<bool>(
@@ -371,6 +496,40 @@ class _UploadsScreenState extends State<UploadsScreen> {
         }
       });
     }
+  }
+
+  Future<bool> _showLargeUploadDialog(int totalSize) async {
+    return await showDialog<bool>(
+          context: context,
+          builder: (context) => AlertDialog(
+            backgroundColor: const Color(0xFF2C2C2E),
+            title: const Text(
+              'Large Upload',
+              style: TextStyle(color: Colors.white),
+            ),
+            content: Text(
+              'You are about to upload ${_formatFileSize(totalSize)} of data. This may take some time and use your data allowance. Continue?',
+              style: const TextStyle(color: Colors.grey),
+            ),
+            actions: [
+              TextButton(
+                onPressed: () => Navigator.pop(context, false),
+                child: const Text(
+                  'Cancel',
+                  style: TextStyle(color: Colors.grey),
+                ),
+              ),
+              TextButton(
+                onPressed: () => Navigator.pop(context, true),
+                child: const Text(
+                  'Continue',
+                  style: TextStyle(color: Colors.blue),
+                ),
+              ),
+            ],
+          ),
+        ) ??
+        false;
   }
 
   // Helper method to get file type from filename
