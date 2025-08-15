@@ -50,23 +50,27 @@ class _UploadsScreenState extends State<UploadsScreen> {
     return AppBar(
       backgroundColor: const Color(0xFF1C1C1E),
       elevation: 0,
+      centerTitle: true,
       title: const Text(
         'Upload Files',
         style: TextStyle(
           color: Colors.white,
-          fontSize: 20,
-          fontWeight: FontWeight.w600,
+          fontSize: 22,
+          fontWeight: FontWeight.bold,
         ),
       ),
       actions: [
         if (_selectedFiles.isNotEmpty)
           TextButton(
             onPressed: _clearAllFiles,
-            child: const Text(
-              'Clear All',
-              style: TextStyle(color: Color(0xFF007AFF)),
+            style: TextButton.styleFrom(
+              foregroundColor: const Color(0xFF007AFF),
+              padding: const EdgeInsets.symmetric(horizontal: 16),
+              shape: const StadiumBorder(),
             ),
+            child: const Text('Clear All'),
           ),
+        const SizedBox(width: 8),
       ],
     );
   }
@@ -101,34 +105,34 @@ class _UploadsScreenState extends State<UploadsScreen> {
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
             Container(
-              width: 120,
-              height: 120,
+              width: 140,
+              height: 140,
               decoration: BoxDecoration(
                 color: const Color(0xFF2C2C2E),
-                borderRadius: BorderRadius.circular(20),
+                shape: BoxShape.circle,
               ),
               child: const Icon(
-                Icons.cloud_upload_outlined,
-                size: 60,
+                Icons.cloud_upload_rounded,
+                size: 70,
                 color: Color(0xFF007AFF),
               ),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             const Text(
-              'No files selected',
+              'No Files Selected',
               style: TextStyle(
                 color: Colors.white,
-                fontSize: 24,
-                fontWeight: FontWeight.w600,
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
               ),
             ),
             const SizedBox(height: 12),
             Text(
-              'Tap the + button to select files to upload',
+              'Tap the + button to select files you want to upload.',
               style: TextStyle(color: Colors.grey[400], fontSize: 16),
               textAlign: TextAlign.center,
             ),
-            const SizedBox(height: 32),
+            const SizedBox(height: 40),
             _buildSelectFilesButton(),
           ],
         ),
@@ -143,7 +147,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
         backgroundColor: const Color(0xFF007AFF),
         foregroundColor: Colors.white,
         padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 16),
-        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        shape: const StadiumBorder(),
         elevation: 0,
       ),
       icon: _isPickingFiles
@@ -151,14 +155,14 @@ class _UploadsScreenState extends State<UploadsScreen> {
               width: 20,
               height: 20,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: 2.5,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             )
-          : const Icon(Icons.add, size: 20),
+          : const Icon(Icons.add_circle_outline_rounded, size: 22),
       label: Text(
         _isPickingFiles ? 'Selecting...' : 'Select Files',
-        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w500),
+        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
       ),
     );
   }
@@ -173,47 +177,46 @@ class _UploadsScreenState extends State<UploadsScreen> {
         .length;
 
     return Container(
-      margin: const EdgeInsets.all(16.0),
-      padding: const EdgeInsets.all(20.0),
+      margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
+      padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(24.0),
       ),
       child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  '${_selectedFiles.length} files selected',
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w600,
-                  ),
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                '${_selectedFiles.length} ${_selectedFiles.length == 1 ? "file" : "files"} selected',
+                style: const TextStyle(
+                  color: Colors.white,
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  'Total size: ${FileManagementService.formatFileSize(totalSize)}',
-                  style: TextStyle(color: Colors.grey[400], fontSize: 14),
-                ),
-              ],
-            ),
+              ),
+              const SizedBox(height: 6),
+              Text(
+                'Total size: ${FileManagementService.formatFileSize(totalSize)}',
+                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+              ),
+            ],
           ),
           if (pendingCount > 0)
             Container(
-              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+              padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
               decoration: BoxDecoration(
-                color: const Color(0xFF007AFF).withOpacity(0.1),
+                color: const Color(0xFF007AFF).withOpacity(0.15),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: Text(
                 '$pendingCount pending',
                 style: const TextStyle(
                   color: Color(0xFF007AFF),
-                  fontSize: 12,
-                  fontWeight: FontWeight.w500,
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
                 ),
               ),
             ),
@@ -224,29 +227,29 @@ class _UploadsScreenState extends State<UploadsScreen> {
 
   Widget _buildFileCard(SelectedFile file, int index) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 12.0),
-      padding: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
+      padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(12.0),
+        borderRadius: BorderRadius.circular(20.0),
         border: Border.all(
-          color: _getStatusColor(file.uploadStatus).withOpacity(0.3),
+          color: _getStatusColor(file.uploadStatus).withOpacity(0.4),
           width: 1,
         ),
       ),
       child: Row(
         children: [
           Container(
-            width: 48,
-            height: 48,
+            width: 52,
+            height: 52,
             decoration: BoxDecoration(
-              color: _getFileTypeColor(file.fileType),
-              borderRadius: BorderRadius.circular(8),
+              color: _getFileTypeColor(file.fileType).withOpacity(0.15),
+              borderRadius: BorderRadius.circular(16),
             ),
             child: Icon(
               _getFileTypeIcon(file.fileType),
-              color: Colors.white,
-              size: 24,
+              color: _getFileTypeColor(file.fileType),
+              size: 28,
             ),
           ),
           const SizedBox(width: 16),
@@ -264,23 +267,23 @@ class _UploadsScreenState extends State<UploadsScreen> {
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,
                 ),
-                const SizedBox(height: 4),
+                const SizedBox(height: 6),
                 Row(
                   children: [
                     Text(
                       FileManagementService.formatFileSize(file.size),
-                      style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                      style: TextStyle(color: Colors.grey[400], fontSize: 13),
                     ),
                     const SizedBox(width: 12),
                     Container(
                       padding: const EdgeInsets.symmetric(
-                        horizontal: 8,
-                        vertical: 2,
+                        horizontal: 10,
+                        vertical: 4,
                       ),
                       decoration: BoxDecoration(
                         color: _getStatusColor(
                           file.uploadStatus,
-                        ).withOpacity(0.1),
+                        ).withOpacity(0.15),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -288,7 +291,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
                         style: TextStyle(
                           color: _getStatusColor(file.uploadStatus),
                           fontSize: 12,
-                          fontWeight: FontWeight.w500,
+                          fontWeight: FontWeight.w600,
                         ),
                       ),
                     ),
@@ -297,9 +300,10 @@ class _UploadsScreenState extends State<UploadsScreen> {
               ],
             ),
           ),
+          const SizedBox(width: 8),
           IconButton(
             onPressed: () => _removeFile(index),
-            icon: const Icon(Icons.close, color: Colors.grey, size: 20),
+            icon: Icon(Icons.close_rounded, color: Colors.grey[500], size: 22),
           ),
         ],
       ),
@@ -314,21 +318,20 @@ class _UploadsScreenState extends State<UploadsScreen> {
     if (pendingFiles.isEmpty) return const SizedBox.shrink();
 
     return Container(
-      padding: const EdgeInsets.all(20.0),
+      padding: const EdgeInsets.fromLTRB(20, 10, 20, 20),
       child: SizedBox(
         width: double.infinity,
-        child: ElevatedButton(
+        child: ElevatedButton.icon(
           onPressed: _uploadAllFiles,
           style: ElevatedButton.styleFrom(
             backgroundColor: const Color(0xFF007AFF),
             foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(
-              borderRadius: BorderRadius.circular(12),
-            ),
+            shape: const StadiumBorder(),
             elevation: 0,
           ),
-          child: Text(
+          icon: const Icon(Icons.upload_rounded, size: 22),
+          label: Text(
             'Upload ${pendingFiles.length} ${pendingFiles.length == 1 ? 'File' : 'Files'}',
             style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600),
           ),
@@ -341,16 +344,18 @@ class _UploadsScreenState extends State<UploadsScreen> {
     return FloatingActionButton(
       onPressed: _isPickingFiles ? null : _pickFiles,
       backgroundColor: const Color(0xFF007AFF),
+      elevation: 2,
+      shape: const CircleBorder(),
       child: _isPickingFiles
           ? const SizedBox(
               width: 24,
               height: 24,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
+                strokeWidth: 2.5,
                 valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
               ),
             )
-          : const Icon(Icons.add, color: Colors.white),
+          : const Icon(Icons.add_rounded, color: Colors.white, size: 32),
     );
   }
 
@@ -548,23 +553,23 @@ class _UploadsScreenState extends State<UploadsScreen> {
   IconData _getFileTypeIcon(AppFileType fileType) {
     switch (fileType) {
       case AppFileType.image:
-        return Icons.image;
+        return Icons.image_rounded;
       case AppFileType.video:
-        return Icons.videocam;
+        return Icons.videocam_rounded;
       case AppFileType.audio:
-        return Icons.music_note;
+        return Icons.music_note_rounded;
       case AppFileType.pdf:
-        return Icons.picture_as_pdf;
+        return Icons.picture_as_pdf_rounded;
       case AppFileType.document:
-        return Icons.description;
+        return Icons.description_rounded;
       case AppFileType.spreadsheet:
-        return Icons.table_chart;
+        return Icons.table_chart_rounded;
       case AppFileType.archive:
-        return Icons.archive;
+        return Icons.archive_rounded;
       case AppFileType.text:
-        return Icons.text_snippet;
+        return Icons.text_snippet_rounded;
       default:
-        return Icons.insert_drive_file;
+        return Icons.insert_drive_file_rounded;
     }
   }
 
