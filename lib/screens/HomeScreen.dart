@@ -426,30 +426,17 @@ class _HomeScreenState extends State<HomeScreen> {
           ],
         ),
         const SizedBox(height: 16.0),
-        Row(
-          children: [
-            Expanded(
-              child: _buildStatCard(
-                'User ID',
-                '#${_userStats!.userId}',
-                Icons.person,
-                Colors.purple,
-              ),
-            ),
-            const SizedBox(width: 16.0),
-            Expanded(
-              child: _buildStatCard(
-                'Storage Used',
-                '${_userStats!.storagePercentage.toStringAsFixed(1)}%',
-                Icons.storage,
-                _userStats!.storagePercentage > 80
-                    ? Colors.red
-                    : _userStats!.storagePercentage > 60
-                    ? Colors.orange
-                    : const Color(0xFF007AFF),
-              ),
-            ),
-          ],
+        // Removed the second row that contained User ID and Storage Used cards
+        // Now only showing Storage Used card taking full width
+        _buildStatCard(
+          'Storage Used',
+          '${_userStats!.storagePercentage.toStringAsFixed(1)}%',
+          Icons.storage,
+          _userStats!.storagePercentage > 80
+              ? Colors.red
+              : _userStats!.storagePercentage > 60
+              ? Colors.orange
+              : const Color(0xFF007AFF),
         ),
       ],
     );
