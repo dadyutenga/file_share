@@ -1,6 +1,8 @@
 // RecentsScreen.dart
 import 'package:flutter/material.dart';
 import 'package:connectivity_plus/connectivity_plus.dart';
+import 'package:flutter_staggered_animations/flutter_staggered_animations.dart';
+import 'package:shimmer/shimmer.dart';
 import '../services/file_management_service.dart';
 import '../models/FileModels.dart';
 import 'PreviewScreen.dart';
@@ -18,10 +20,9 @@ class _RecentsScreenState extends State<RecentsScreen>
   bool _isGridView = true;
   List<FileItem> _userFiles = [];
   String? _errorMessage;
-  UserStats? _userStats;
 
   @override
-  bool get wantKeepAlive => true; // Keep state alive
+  bool get wantKeepAlive => true;
 
   @override
   void initState() {
@@ -31,46 +32,34 @@ class _RecentsScreenState extends State<RecentsScreen>
 
   Future<void> _loadUserFiles() async {
     if (!mounted) return;
+    setState(() {
+      _isLoading = true;
+      _errorMessage = null;
+    });
 
     try {
-      setState(() {
-        _isLoading = true;
-        _errorMessage = null;
-      });
-
-      // Check network connectivity first
       final connectivityResult = await Connectivity().checkConnectivity();
       if (connectivityResult == ConnectivityResult.none) {
-        if (mounted) {
-          setState(() {
-            _errorMessage = 'Please connect to the internet';
-            _isLoading = false;
-          });
-        }
-        return;
+        throw Exception('Please connect to the internet');
       }
 
       final response = await FileManagementService.getUserFiles(
-        limit: 100, // Load more files for recents
+        limit: 100,
         offset: 0,
       );
 
       if (mounted) {
         setState(() {
           _userFiles = response.files;
-          _userStats = response.userStats;
           _isLoading = false;
         });
       }
     } catch (e) {
       if (mounted) {
         setState(() {
-          if (e.toString().contains('Network') ||
-              e.toString().contains('Connection')) {
-            _errorMessage = 'Please connect to the internet';
-          } else {
-            _errorMessage = 'Failed to load files: ${e.toString()}';
-          }
+          _errorMessage = e.toString().contains('internet')
+              ? 'No Internet Connection'
+              : 'Failed to load files';
           _isLoading = false;
         });
       }
@@ -82,158 +71,164 @@ class _RecentsScreenState extends State<RecentsScreen>
       context,
       MaterialPageRoute(builder: (context) => PreviewScreen(file: file)),
     );
-
-    if (result != null && mounted) {
-      if (result == true || result == 'deleted' || result == 'modified') {
-        await _loadUserFiles();
-      }
+    if (result != null &&
+        (result == true || result == 'deleted' || result == 'modified')) {
+      await _loadUserFiles();
     }
   }
 
   @override
   Widget build(BuildContext context) {
-    super.build(context); // Required for AutomaticKeepAliveClientMixin
-
-    return RefreshIndicator(
-      onRefresh: _loadUserFiles,
-      color: const Color(0xFF007AFF),
-      backgroundColor: const Color(0xFF2C2C2E),
-      child: SingleChildScrollView(
-        physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20.0),
-        child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [_buildFilesSection()],
-        ),
+    super.build(context);
+    return Scaffold(
+      backgroundColor: const Color(0xFF1C1C1E),
+      body: RefreshIndicator(
+        onRefresh: _loadUserFiles,
+        color: const Color(0xFF007AFF),
+        backgroundColor: const Color(0xFF2C2C2E),
+        child: _buildBody(),
       ),
     );
   }
 
-  Widget _buildFilesSection() {
-    if (_isLoading) {
-      return _buildLoadingState();
-    }
-
-    if (_errorMessage != null) {
-      return _buildErrorState();
-    }
-
-    if (_userFiles.isEmpty) {
-      return _buildEmptyState();
-    }
-
-    return Column(
-      children: [
-        Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-          children: [
-            Text(
-              'Files (${_userFiles.length})',
-              style: const TextStyle(
-                color: Colors.white,
-                fontSize: 20.0,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-            Row(
-              children: [
-                IconButton(
-                  onPressed: () => setState(() => _isGridView = false),
-                  icon: Icon(
-                    Icons.list,
-                    color: !_isGridView
-                        ? const Color(0xFF007AFF)
-                        : Colors.grey[400],
-                    size: 20.0,
-                  ),
-                ),
-                IconButton(
-                  onPressed: () => setState(() => _isGridView = true),
-                  icon: Icon(
-                    Icons.grid_view,
-                    color: _isGridView
-                        ? const Color(0xFF007AFF)
-                        : Colors.grey[400],
-                    size: 20.0,
-                  ),
-                ),
-              ],
-            ),
-          ],
+  Widget _buildBody() {
+    return CustomScrollView(
+      physics: const AlwaysScrollableScrollPhysics(),
+      slivers: [
+        SliverAppBar(
+          backgroundColor: const Color(0xFF1C1C1E),
+          pinned: true,
+          floating: true,
+          automaticallyImplyLeading: false,
+          title: const Text(
+            'Your Files',
+            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+          ),
+          actions: [_buildViewToggle(), const SizedBox(width: 16)],
         ),
-        const SizedBox(height: 16.0),
-        _isGridView ? _buildFilesGrid() : _buildFilesList(),
+        SliverToBoxAdapter(child: _buildContent()),
       ],
     );
   }
 
-  Widget _buildLoadingState() {
+  Widget _buildContent() {
+    if (_isLoading) {
+      return _buildLoadingState();
+    }
+    if (_errorMessage != null) {
+      return _buildErrorState();
+    }
+    if (_userFiles.isEmpty) {
+      return _buildEmptyState();
+    }
+    return AnimationLimiter(
+      child: _isGridView ? _buildFilesGrid() : _buildFilesList(),
+    );
+  }
+
+  Widget _buildViewToggle() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(40.0),
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(20),
       ),
-      child: const Column(
+      child: Row(
         children: [
-          CircularProgressIndicator(color: Color(0xFF007AFF)),
-          SizedBox(height: 16.0),
-          Text(
-            'Loading files...',
-            style: TextStyle(color: Colors.grey, fontSize: 16.0),
-          ),
+          _buildToggleButton(Icons.grid_view_rounded, true),
+          _buildToggleButton(Icons.list_alt_rounded, false),
         ],
+      ),
+    );
+  }
+
+  Widget _buildToggleButton(IconData icon, bool isGridViewSelected) {
+    final bool isActive = _isGridView == isGridViewSelected;
+    return GestureDetector(
+      onTap: () => setState(() => _isGridView = isGridViewSelected),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 200),
+        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+        decoration: BoxDecoration(
+          color: isActive ? const Color(0xFF007AFF) : Colors.transparent,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Icon(
+          icon,
+          color: isActive ? Colors.white : Colors.grey[400],
+          size: 20,
+        ),
+      ),
+    );
+  }
+
+  Widget _buildLoadingState() {
+    return Padding(
+      padding: const EdgeInsets.all(16.0),
+      child: Shimmer.fromColors(
+        baseColor: const Color(0xFF2C2C2E),
+        highlightColor: const Color(0xFF3A3A3C),
+        child: _isGridView
+            ? GridView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
+                  crossAxisCount: 2,
+                  crossAxisSpacing: 16,
+                  mainAxisSpacing: 16,
+                  childAspectRatio: 0.85,
+                ),
+                itemCount: 8,
+                itemBuilder: (_, __) => Container(
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(16),
+                  ),
+                ),
+              )
+            : ListView.builder(
+                shrinkWrap: true,
+                physics: const NeverScrollableScrollPhysics(),
+                itemCount: 8,
+                itemBuilder: (_, __) => Container(
+                  height: 80,
+                  margin: const EdgeInsets.only(bottom: 12),
+                  decoration: BoxDecoration(
+                    color: Colors.black,
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                ),
+              ),
       ),
     );
   }
 
   Widget _buildErrorState() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(40.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
+      height: MediaQuery.of(context).size.height * 0.6,
+      alignment: Alignment.center,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
           Icon(
             _errorMessage!.contains('internet')
                 ? Icons.wifi_off
                 : Icons.error_outline,
-            color: _errorMessage!.contains('internet')
-                ? Colors.orange[400]
-                : Colors.red[400],
-            size: 64.0,
+            color: Colors.orange[400],
+            size: 80,
           ),
-          const SizedBox(height: 16.0),
-          Text(
-            _errorMessage!.contains('internet')
-                ? 'No Internet Connection'
-                : 'Failed to load files',
-            style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 16.0,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 24),
           Text(
             _errorMessage!,
-            style: TextStyle(color: Colors.grey[500], fontSize: 14.0),
-            textAlign: TextAlign.center,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
           ),
-          const SizedBox(height: 16.0),
-          ElevatedButton(
-            onPressed: _loadUserFiles,
-            style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF007AFF),
-              foregroundColor: Colors.white,
-            ),
-            child: Text(
-              _errorMessage!.contains('internet') ? 'Retry' : 'Retry',
-            ),
+          const SizedBox(height: 12),
+          Text(
+            'Pull down to try again.',
+            style: TextStyle(color: Colors.grey[400], fontSize: 14),
           ),
         ],
       ),
@@ -242,28 +237,30 @@ class _RecentsScreenState extends State<RecentsScreen>
 
   Widget _buildEmptyState() {
     return Container(
-      width: double.infinity,
-      padding: const EdgeInsets.all(40.0),
-      decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(16.0),
-      ),
+      height: MediaQuery.of(context).size.height * 0.6,
+      alignment: Alignment.center,
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          Icon(Icons.cloud_outlined, color: Colors.grey[400], size: 64.0),
-          const SizedBox(height: 16.0),
-          Text(
-            'No files uploaded yet',
+          const Icon(
+            Icons.cloud_off_rounded,
+            color: Color(0xFF007AFF),
+            size: 80,
+          ),
+          const SizedBox(height: 24),
+          const Text(
+            'Your storage is empty',
             style: TextStyle(
-              color: Colors.grey[400],
-              fontSize: 16.0,
-              fontWeight: FontWeight.w500,
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
             ),
           ),
-          const SizedBox(height: 8.0),
+          const SizedBox(height: 12),
           Text(
-            'Upload some files to get started',
-            style: TextStyle(color: Colors.grey[500], fontSize: 14.0),
+            'Go to the Uploads tab to add your first file.',
+            textAlign: TextAlign.center,
+            style: TextStyle(color: Colors.grey[400], fontSize: 14),
           ),
         ],
       ),
@@ -274,14 +271,26 @@ class _RecentsScreenState extends State<RecentsScreen>
     return GridView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.all(16),
       gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
         crossAxisCount: 2,
-        crossAxisSpacing: 16.0,
-        mainAxisSpacing: 16.0,
+        crossAxisSpacing: 16,
+        mainAxisSpacing: 16,
         childAspectRatio: 0.85,
       ),
       itemCount: _userFiles.length,
-      itemBuilder: (context, index) => _buildFileCardGrid(_userFiles[index]),
+      itemBuilder: (context, index) {
+        return AnimationConfiguration.staggeredGrid(
+          position: index,
+          duration: const Duration(milliseconds: 375),
+          columnCount: 2,
+          child: ScaleAnimation(
+            child: FadeInAnimation(
+              child: _buildFileCardGrid(_userFiles[index]),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -289,8 +298,20 @@ class _RecentsScreenState extends State<RecentsScreen>
     return ListView.builder(
       shrinkWrap: true,
       physics: const NeverScrollableScrollPhysics(),
+      padding: const EdgeInsets.symmetric(horizontal: 16),
       itemCount: _userFiles.length,
-      itemBuilder: (context, index) => _buildFileCardList(_userFiles[index]),
+      itemBuilder: (context, index) {
+        return AnimationConfiguration.staggeredList(
+          position: index,
+          duration: const Duration(milliseconds: 375),
+          child: SlideAnimation(
+            verticalOffset: 50.0,
+            child: FadeInAnimation(
+              child: _buildFileCardList(_userFiles[index]),
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -304,83 +325,57 @@ class _RecentsScreenState extends State<RecentsScreen>
         decoration: BoxDecoration(
           color: const Color(0xFF2C2C2E),
           borderRadius: BorderRadius.circular(16.0),
-          border: Border.all(color: Colors.grey[800]!, width: 1),
         ),
-        child: Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Column(
-            crossAxisAlignment: CrossAxisAlignment.start,
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Container(
-                    width: 48.0,
-                    height: 48.0,
-                    decoration: BoxDecoration(
-                      color: iconColor.withOpacity(0.1),
-                      borderRadius: BorderRadius.circular(12.0),
-                    ),
-                    child: Icon(
-                      _getFileTypeIconData(fileType),
-                      color: iconColor,
-                      size: 24.0,
-                    ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Expanded(
+              child: Container(
+                width: double.infinity,
+                decoration: BoxDecoration(
+                  color: iconColor.withOpacity(0.1),
+                  borderRadius: const BorderRadius.only(
+                    topLeft: Radius.circular(16),
+                    topRight: Radius.circular(16),
                   ),
-                  Column(
+                ),
+                child: Icon(
+                  _getFileTypeIconData(fileType),
+                  color: iconColor,
+                  size: 48,
+                ),
+              ),
+            ),
+            Padding(
+              padding: const EdgeInsets.all(12.0),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    file.filename,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                  const SizedBox(height: 4),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      Text(
+                        file.formattedSize,
+                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                      ),
                       if (file.isPublic)
-                        Icon(
-                          Icons.public,
-                          color: Colors.green[400],
-                          size: 16.0,
-                        ),
-                      if (file.isExpired)
-                        Icon(
-                          Icons.access_time,
-                          color: Colors.red[400],
-                          size: 16.0,
-                        ),
+                        Icon(Icons.public, color: Colors.green[400], size: 14),
                     ],
                   ),
                 ],
               ),
-              const SizedBox(height: 12.0),
-              Flexible(
-                child: Text(
-                  file.filename,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 14.0,
-                    fontWeight: FontWeight.w500,
-                  ),
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                ),
-              ),
-              const SizedBox(height: 4.0),
-              Text(
-                file.formattedSize,
-                style: TextStyle(color: Colors.grey[400], fontSize: 12.0),
-              ),
-              const SizedBox(height: 2.0),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  Text(
-                    file.formattedUploadTime,
-                    style: TextStyle(color: Colors.grey[500], fontSize: 11.0),
-                  ),
-                  if (file.downloadCount > 0)
-                    Text(
-                      '${file.downloadCount} ↓',
-                      style: TextStyle(color: Colors.grey[500], fontSize: 11.0),
-                    ),
-                ],
-              ),
-            ],
-          ),
+            ),
+          ],
         ),
       ),
     );
@@ -394,17 +389,16 @@ class _RecentsScreenState extends State<RecentsScreen>
       onTap: () => _openFilePreview(file),
       child: Container(
         margin: const EdgeInsets.only(bottom: 12.0),
-        padding: const EdgeInsets.all(16.0),
+        padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
           color: const Color(0xFF2C2C2E),
           borderRadius: BorderRadius.circular(12.0),
-          border: Border.all(color: Colors.grey[800]!, width: 1),
         ),
         child: Row(
           children: [
             Container(
-              width: 48.0,
-              height: 48.0,
+              width: 56,
+              height: 56,
               decoration: BoxDecoration(
                 color: iconColor.withOpacity(0.1),
                 borderRadius: BorderRadius.circular(12.0),
@@ -412,7 +406,7 @@ class _RecentsScreenState extends State<RecentsScreen>
               child: Icon(
                 _getFileTypeIconData(fileType),
                 color: iconColor,
-                size: 24.0,
+                size: 28,
               ),
             ),
             const SizedBox(width: 16.0),
@@ -429,47 +423,25 @@ class _RecentsScreenState extends State<RecentsScreen>
                     ),
                     overflow: TextOverflow.ellipsis,
                   ),
-                  const SizedBox(height: 4.0),
-                  Row(
-                    children: [
-                      Text(
-                        file.formattedSize,
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 12.0,
-                        ),
-                      ),
-                      const SizedBox(width: 8.0),
-                      Text(
-                        '•',
-                        style: TextStyle(
-                          color: Colors.grey[500],
-                          fontSize: 12.0,
-                        ),
-                      ),
-                      const SizedBox(width: 8.0),
-                      Text(
-                        file.formattedUploadTime,
-                        style: TextStyle(
-                          color: Colors.grey[400],
-                          fontSize: 12.0,
-                        ),
-                      ),
-                    ],
+                  const SizedBox(height: 6.0),
+                  Text(
+                    '${file.formattedSize} • ${file.formattedUploadTime}',
+                    style: TextStyle(color: Colors.grey[400], fontSize: 12.0),
                   ),
                 ],
               ),
             ),
+            const SizedBox(width: 12),
             Column(
+              crossAxisAlignment: CrossAxisAlignment.end,
               children: [
                 if (file.isPublic)
-                  Icon(Icons.public, color: Colors.green[400], size: 16.0),
-                if (file.isExpired)
-                  Icon(Icons.access_time, color: Colors.red[400], size: 16.0),
+                  Icon(Icons.public, color: Colors.green[400], size: 16),
+                const SizedBox(height: 4),
                 if (file.downloadCount > 0)
                   Text(
                     '${file.downloadCount} ↓',
-                    style: TextStyle(color: Colors.grey[500], fontSize: 10.0),
+                    style: TextStyle(color: Colors.grey[500], fontSize: 12),
                   ),
               ],
             ),
@@ -502,16 +474,8 @@ class _RecentsScreenState extends State<RecentsScreen>
         return const Color(0xFFB19CD9);
       case FileType.audio:
         return const Color(0xFFFFE135);
-      case FileType.pdf:
-        return const Color(0xFF4A90E2);
       case FileType.document:
         return const Color(0xFF007AFF);
-      case FileType.spreadsheet:
-        return const Color(0xFF34C759);
-      case FileType.archive:
-        return const Color(0xFFFF9500);
-      case FileType.text:
-        return const Color(0xFF5AC8FA);
       default:
         return Colors.grey;
     }
@@ -520,23 +484,27 @@ class _RecentsScreenState extends State<RecentsScreen>
   IconData _getFileTypeIconData(FileType fileType) {
     switch (fileType) {
       case FileType.image:
-        return Icons.image;
+        return Icons.image_rounded;
       case FileType.video:
-        return Icons.videocam;
+        return Icons.videocam_rounded;
       case FileType.audio:
-        return Icons.music_note;
-      case FileType.pdf:
-        return Icons.description;
+        return Icons.music_note_rounded;
       case FileType.document:
-        return Icons.description;
-      case FileType.spreadsheet:
-        return Icons.table_chart;
-      case FileType.archive:
-        return Icons.archive;
-      case FileType.text:
-        return Icons.text_snippet;
+        return Icons.description_rounded;
       default:
-        return Icons.insert_drive_file;
+        return Icons.insert_drive_file_rounded;
     }
   }
+}
+
+enum FileType {
+  image,
+  video,
+  audio,
+  pdf,
+  document,
+  spreadsheet,
+  archive,
+  text,
+  unknown,
 }
