@@ -229,6 +229,44 @@ class FileManagementService {
     }
   }
 
+  /// Delete all user files
+  static Future<DeleteAllResponse> deleteAllFiles() async {
+    try {
+      _initializeDio();
+
+      final token = await SessionManager.getToken();
+      if (token == null) {
+        throw Exception('User not authenticated');
+      }
+
+      final response = await _dio.post(
+        _deleteAllEndpoint,
+        options: Options(
+          headers: {
+            'Authorization': 'Bearer $token',
+            'Content-Type': 'application/json',
+          },
+        ),
+      );
+
+      if (response.statusCode == 200) {
+        return DeleteAllResponse.fromJson(response.data);
+      } else {
+        throw Exception(
+          'Failed to delete all files: ${response.statusMessage}',
+        );
+      }
+    } catch (e) {
+      if (e is DioException) {
+        if (e.response?.data != null && e.response!.data['message'] != null) {
+          throw Exception(e.response!.data['message']);
+        }
+        throw Exception('Network error: ${e.message}');
+      }
+      throw Exception('Failed to delete all files: ${e.toString()}');
+    }
+  }
+
   // ==================== UTILITY METHODS ====================
 
   /// Format file size
