@@ -14,6 +14,7 @@ class _LoginScreenState extends State<LoginScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -31,12 +32,12 @@ class _LoginScreenState extends State<LoginScreen> {
     final passwordError = AuthService.validatePassword(password);
 
     if (usernameError != null) {
-      _showErrorSnackBar(usernameError);
+      _showErrorDialog(usernameError);
       return;
     }
 
     if (passwordError != null) {
-      _showErrorSnackBar(passwordError);
+      _showErrorDialog(passwordError);
       return;
     }
 
@@ -48,15 +49,21 @@ class _LoginScreenState extends State<LoginScreen> {
       final response = await AuthService.loginUser(username, password);
 
       if (response.success && response.data != null) {
-        // Login successful, navigate to home screen
+        // Show success message
+        _showSuccessDialog('Login successful! Welcome back.');
+
+        // Navigate to home screen after a short delay
+        await Future.delayed(const Duration(milliseconds: 1500));
         if (mounted) {
           Navigator.pushReplacementNamed(context, AppRoutes.home);
         }
       } else {
-        _showErrorSnackBar(response.message);
+        _showErrorDialog(response.message);
       }
     } catch (e) {
-      _showErrorSnackBar('An unexpected error occurred');
+      _showErrorDialog(
+        'Network error. Please check your connection and try again.',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -66,18 +73,150 @@ class _LoginScreenState extends State<LoginScreen> {
     }
   }
 
-  void _showErrorSnackBar(String message) {
+  void _showErrorDialog(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-        ),
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: Colors.red.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  const Text(
+                    'Login Failed',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                  ),
+                  const SizedBox(height: 20.0),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Try Again',
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  void _showSuccessDialog(String message) {
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: Colors.green.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.green,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  const Text(
+                    'Success!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                  ),
+                  const SizedBox(height: 16.0),
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.0,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       );
     }
   }
@@ -94,7 +233,7 @@ class _LoginScreenState extends State<LoginScreen> {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFF1C1C1E),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -105,12 +244,20 @@ class _LoginScreenState extends State<LoginScreen> {
               children: <Widget>[
                 const SizedBox(height: 60.0),
                 // Cloud upload icon
-                const Icon(
-                  Icons.cloud_upload_outlined,
-                  color: Color(0xFF007AFF),
-                  size: 64.0,
+                Container(
+                  width: 80,
+                  height: 80,
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF007AFF).withOpacity(0.1),
+                    shape: BoxShape.circle,
+                  ),
+                  child: const Icon(
+                    Icons.cloud_upload_outlined,
+                    color: Color(0xFF007AFF),
+                    size: 40.0,
+                  ),
                 ),
-                const SizedBox(height: 40.0),
+                const SizedBox(height: 32.0),
                 // Welcome Back title
                 const Text(
                   'Welcome Back',
@@ -118,7 +265,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 28.0,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -133,7 +280,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 48.0),
-                // Username field
+                // Username field with icon
                 TextField(
                   controller: _usernameController,
                   enabled: !_isLoading,
@@ -146,6 +293,11 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.grey[500],
                       fontSize: 16.0,
                     ),
+                    prefixIcon: Icon(
+                      Icons.person_outline,
+                      color: Colors.grey[500],
+                      size: 20.0,
+                    ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16.0,
                       vertical: 18.0,
@@ -162,17 +314,17 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: const BorderSide(
                         color: Color(0xFF007AFF),
-                        width: 1.0,
+                        width: 2.0,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                // Password field
+                // Password field with icon and visibility toggle
                 TextField(
                   controller: _passwordController,
                   enabled: !_isLoading,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   style: const TextStyle(color: Colors.white, fontSize: 16.0),
                   decoration: InputDecoration(
                     filled: true,
@@ -182,6 +334,25 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.grey[500],
                       fontSize: 16.0,
                     ),
+                    prefixIcon: Icon(
+                      Icons.lock_outline,
+                      color: Colors.grey[500],
+                      size: 20.0,
+                    ),
+                    suffixIcon: IconButton(
+                      icon: Icon(
+                        _obscurePassword
+                            ? Icons.visibility_off
+                            : Icons.visibility,
+                        color: Colors.grey[500],
+                        size: 20.0,
+                      ),
+                      onPressed: () {
+                        setState(() {
+                          _obscurePassword = !_obscurePassword;
+                        });
+                      },
+                    ),
                     contentPadding: const EdgeInsets.symmetric(
                       horizontal: 16.0,
                       vertical: 18.0,
@@ -198,47 +369,52 @@ class _LoginScreenState extends State<LoginScreen> {
                       borderRadius: BorderRadius.circular(12.0),
                       borderSide: const BorderSide(
                         color: Color(0xFF007AFF),
-                        width: 1.0,
+                        width: 2.0,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 40.0),
+                const SizedBox(height: 32.0),
                 // Login button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleLogin,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF007AFF),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                SizedBox(
+                  height: 54.0,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleLogin,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF007AFF),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: const Color(
+                        0xFF007AFF,
+                      ).withOpacity(0.6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(12.0),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20.0,
-                          width: 20.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20.0,
+                            width: 20.0,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            'Login',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        )
-                      : const Text(
-                          'Login',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                  ),
                 ),
                 const SizedBox(height: 32.0),
-                // Register link - Smooth navigation
-                Wrap(
-                  alignment: WrapAlignment.center,
+                // Register link
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
                       "Don't have an account? ",
@@ -254,10 +430,14 @@ class _LoginScreenState extends State<LoginScreen> {
                         'Register here',
                         style: TextStyle(
                           color: _isLoading
-                              ? Colors.grey
+                              ? Colors.grey[600]
                               : const Color(0xFF007AFF),
                           fontSize: 14.0,
                           fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                          decorationColor: _isLoading
+                              ? Colors.grey[600]
+                              : const Color(0xFF007AFF),
                         ),
                       ),
                     ),
