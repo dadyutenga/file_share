@@ -35,7 +35,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
     final fileType = _getFileTypeFromCategory(widget.file.fileCategory);
 
     // Only load preview for images
-    if (fileType != FileType.image) return;
+    if (fileType != AppFileType.image) return;
 
     setState(() {
       _isLoading = true;
@@ -139,7 +139,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
 
   Future<void> _shareFile() async {
     try {
-      // Use the public URL or download URL - whatever exists in your FileItem
       final shareUrl = widget.file.downloadUrl.isNotEmpty
           ? widget.file.downloadUrl
           : 'Check out this file: ${widget.file.filename}';
@@ -171,7 +170,6 @@ class _PreviewScreenState extends State<PreviewScreen> {
         widget.file.fileId,
       );
 
-      // Check if delete was successful
       if (response.success) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
@@ -291,7 +289,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
     );
   }
 
-  Widget _buildPreviewContent(FileType fileType) {
+  Widget _buildPreviewContent(AppFileType fileType) {
     if (_isLoading) {
       return const SizedBox(
         height: 300,
@@ -337,9 +335,9 @@ class _PreviewScreenState extends State<PreviewScreen> {
     }
 
     switch (fileType) {
-      case FileType.image:
+      case AppFileType.image:
         return _buildImagePreview();
-      case FileType.video:
+      case AppFileType.video:
         return _buildVideoPreview();
       default:
         return _buildGenericPreview(fileType);
@@ -485,7 +483,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
     return extension;
   }
 
-  Widget _buildGenericPreview(FileType fileType) {
+  Widget _buildGenericPreview(AppFileType fileType) {
     final iconColor = _getFileTypeColor(fileType);
     final iconData = _getFileTypeIconData(fileType);
     final typeName = _getFileTypeDisplayName(fileType);
@@ -776,85 +774,85 @@ class _PreviewScreenState extends State<PreviewScreen> {
     );
   }
 
-  // Helper methods
-  FileType _getFileTypeFromCategory(String category) {
+  // Helper methods - Fixed to use AppFileType
+  AppFileType _getFileTypeFromCategory(String category) {
     switch (category.toLowerCase()) {
       case 'image':
-        return FileType.image;
+        return AppFileType.image;
       case 'video':
-        return FileType.video;
+        return AppFileType.video;
       case 'document':
-        return FileType.document;
+        return AppFileType.document;
       case 'audio':
-        return FileType.audio;
+        return AppFileType.audio;
       default:
-        return FileType.unknown;
+        return AppFileType.unknown;
     }
   }
 
-  Color _getFileTypeColor(FileType fileType) {
+  Color _getFileTypeColor(AppFileType fileType) {
     switch (fileType) {
-      case FileType.image:
+      case AppFileType.image:
         return const Color(0xFF50C878);
-      case FileType.video:
+      case AppFileType.video:
         return const Color(0xFFB19CD9);
-      case FileType.audio:
+      case AppFileType.audio:
         return const Color(0xFFFFE135);
-      case FileType.pdf:
+      case AppFileType.pdf:
         return const Color(0xFF4A90E2);
-      case FileType.document:
+      case AppFileType.document:
         return const Color(0xFF007AFF);
-      case FileType.spreadsheet:
+      case AppFileType.spreadsheet:
         return const Color(0xFF34C759);
-      case FileType.archive:
+      case AppFileType.archive:
         return const Color(0xFFFF9500);
-      case FileType.text:
+      case AppFileType.text:
         return const Color(0xFF5AC8FA);
       default:
         return Colors.grey;
     }
   }
 
-  IconData _getFileTypeIconData(FileType fileType) {
+  IconData _getFileTypeIconData(AppFileType fileType) {
     switch (fileType) {
-      case FileType.image:
+      case AppFileType.image:
         return Icons.image;
-      case FileType.video:
+      case AppFileType.video:
         return Icons.videocam;
-      case FileType.audio:
+      case AppFileType.audio:
         return Icons.music_note;
-      case FileType.pdf:
+      case AppFileType.pdf:
         return Icons.description;
-      case FileType.document:
+      case AppFileType.document:
         return Icons.description;
-      case FileType.spreadsheet:
+      case AppFileType.spreadsheet:
         return Icons.table_chart;
-      case FileType.archive:
+      case AppFileType.archive:
         return Icons.archive;
-      case FileType.text:
+      case AppFileType.text:
         return Icons.text_snippet;
       default:
         return Icons.insert_drive_file;
     }
   }
 
-  String _getFileTypeDisplayName(FileType fileType) {
+  String _getFileTypeDisplayName(AppFileType fileType) {
     switch (fileType) {
-      case FileType.image:
+      case AppFileType.image:
         return 'Image';
-      case FileType.video:
+      case AppFileType.video:
         return 'Video';
-      case FileType.audio:
+      case AppFileType.audio:
         return 'Audio';
-      case FileType.pdf:
+      case AppFileType.pdf:
         return 'PDF';
-      case FileType.document:
+      case AppFileType.document:
         return 'Document';
-      case FileType.spreadsheet:
+      case AppFileType.spreadsheet:
         return 'Spreadsheet';
-      case FileType.archive:
+      case AppFileType.archive:
         return 'Archive';
-      case FileType.text:
+      case AppFileType.text:
         return 'Text';
       default:
         return 'File';
