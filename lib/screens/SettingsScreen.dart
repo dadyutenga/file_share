@@ -155,25 +155,53 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildPremiumCard(),
             const SizedBox(height: 24),
             _buildSectionTitle('Account'),
-            _buildSettingsTile(
-              icon: Icons.delete_forever_rounded,
-              color: Colors.red,
-              title: 'Clear Your Storage',
-              subtitle: 'Permanently delete all your uploaded files',
-              onTap: _isDeleting ? null : _handleDeleteAllFiles,
-              trailing: _isDeleting
-                  ? const SizedBox(
-                      width: 20,
-                      height: 20,
-                      child: CircularProgressIndicator(strokeWidth: 2),
-                    )
-                  : null,
-            ),
-            _buildSettingsTile(
-              icon: Icons.logout_rounded,
-              color: Colors.red,
-              title: 'Logout',
-              onTap: _handleLogout,
+            Container(
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Column(
+                children: [
+                  _buildSettingsTile(
+                    icon: Icons.delete_forever_rounded,
+                    color: const Color(0xFFFF453A),
+                    title: 'Clear Your Storage',
+                    subtitle: 'Permanently delete all your uploaded files',
+                    onTap: _isDeleting ? null : _handleDeleteAllFiles,
+                    trailing: _isDeleting
+                        ? const SizedBox(
+                            width: 20,
+                            height: 20,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2,
+                              color: Color(0xFFFF453A),
+                            ),
+                          )
+                        : const Icon(
+                            Icons.arrow_forward_ios_rounded,
+                            size: 16,
+                            color: Colors.grey,
+                          ),
+                  ),
+                  const Divider(
+                    color: Color(0xFF3A3A3C),
+                    height: 1,
+                    indent: 56,
+                    endIndent: 16,
+                  ),
+                  _buildSettingsTile(
+                    icon: Icons.logout_rounded,
+                    color: const Color(0xFFFF453A),
+                    title: 'Logout',
+                    onTap: _handleLogout,
+                    trailing: const Icon(
+                      Icons.arrow_forward_ios_rounded,
+                      size: 16,
+                      color: Colors.grey,
+                    ),
+                  ),
+                ],
+              ),
             ),
           ],
         ),
@@ -279,22 +307,20 @@ class _SettingsScreenState extends State<SettingsScreen> {
     Widget? trailing,
   }) {
     return ListTile(
-      contentPadding: const EdgeInsets.symmetric(vertical: 4),
+      contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
       leading: Icon(icon, color: color ?? Colors.grey[400]),
       title: Text(
         title,
-        style: TextStyle(color: color ?? Colors.white, fontSize: 16),
+        style: TextStyle(
+          color: color ?? Colors.white,
+          fontSize: 16,
+          fontWeight: FontWeight.w500,
+        ),
       ),
       subtitle: subtitle != null
           ? Text(subtitle, style: TextStyle(color: Colors.grey[500]))
           : null,
-      trailing:
-          trailing ??
-          const Icon(
-            Icons.arrow_forward_ios_rounded,
-            size: 16,
-            color: Colors.grey,
-          ),
+      trailing: trailing,
       onTap: onTap,
     );
   }
