@@ -9,6 +9,18 @@ import 'package:device_info_plus/device_info_plus.dart';
 import '../services/file_management_service.dart';
 import '../models/FileModels.dart';
 
+enum AppFileType {
+  image,
+  video,
+  audio,
+  pdf,
+  document,
+  spreadsheet,
+  archive,
+  text,
+  unknown,
+}
+
 class PreviewScreen extends StatefulWidget {
   final FileItem file;
 
@@ -235,12 +247,14 @@ class _PreviewScreenState extends State<PreviewScreen> {
     return Scaffold(
       backgroundColor: const Color(0xFF1C1C1E),
       appBar: _buildAppBar(),
-      body: Column(
-        children: [
-          Expanded(child: _buildFilePreview()),
-          _buildFileInfo(),
-          _buildActionButtons(),
-        ],
+      body: SafeArea(
+        child: Column(
+          children: [
+            Expanded(child: _buildFilePreview()),
+            _buildFileInfo(),
+            _buildActionButtons(),
+          ],
+        ),
       ),
     );
   }
@@ -257,7 +271,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
         widget.file.filename,
         style: const TextStyle(
           color: Colors.white,
-          fontSize: 18,
+          fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
         maxLines: 1,
@@ -277,13 +291,13 @@ class _PreviewScreenState extends State<PreviewScreen> {
 
     return Container(
       width: double.infinity,
-      margin: const EdgeInsets.all(16.0),
+      margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(20.0),
       ),
       child: ClipRRect(
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(20.0),
         child: _buildPreviewContent(fileType),
       ),
     );
@@ -298,7 +312,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               CircularProgressIndicator(color: Color(0xFF007AFF)),
-              SizedBox(height: 16),
+              SizedBox(height: 20),
               Text(
                 'Loading preview...',
                 style: TextStyle(color: Colors.grey, fontSize: 16),
@@ -317,7 +331,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Icon(Icons.error_outline, color: Colors.red[400], size: 64),
-              const SizedBox(height: 16),
+              const SizedBox(height: 20),
               Text(
                 'Preview not available',
                 style: TextStyle(color: Colors.grey[400], fontSize: 16),
@@ -348,7 +362,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
     if (_fileData == null) return const SizedBox.shrink();
 
     return Container(
-      constraints: const BoxConstraints(minHeight: 200, maxHeight: 400),
+      constraints: const BoxConstraints(minHeight: 200, maxHeight: 450),
       child: Image.memory(
         _fileData!,
         fit: BoxFit.contain,
@@ -488,7 +502,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
     final iconData = _getFileTypeIconData(fileType);
     final typeName = _getFileTypeDisplayName(fileType);
 
-    return Container(
+    return SizedBox(
       height: 250,
       child: Center(
         child: Column(
@@ -499,11 +513,11 @@ class _PreviewScreenState extends State<PreviewScreen> {
               height: 100,
               decoration: BoxDecoration(
                 color: iconColor.withOpacity(0.1),
-                borderRadius: BorderRadius.circular(20),
+                borderRadius: BorderRadius.circular(24),
               ),
               child: Icon(iconData, color: iconColor, size: 50),
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 24),
             Text(
               typeName,
               style: const TextStyle(
@@ -525,36 +539,29 @@ class _PreviewScreenState extends State<PreviewScreen> {
 
   Widget _buildFileInfo() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16.0),
-      padding: const EdgeInsets.all(20.0),
+      margin: const EdgeInsets.symmetric(horizontal: 20.0),
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       decoration: BoxDecoration(
         color: const Color(0xFF2C2C2E),
-        borderRadius: BorderRadius.circular(16.0),
+        borderRadius: BorderRadius.circular(20.0),
       ),
       child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Row(
-            children: [
-              Expanded(
-                child: Text(
-                  widget.file.filename,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 18,
-                    fontWeight: FontWeight.w600,
-                  ),
-                ),
-              ),
-            ],
+          Text(
+            widget.file.filename,
+            style: const TextStyle(
+              color: Colors.white,
+              fontSize: 18,
+              fontWeight: FontWeight.w600,
+            ),
+            maxLines: 2,
+            overflow: TextOverflow.ellipsis,
           ),
-          const SizedBox(height: 4),
-          Row(
-            children: [
-              Text(
-                'Uploaded ${_getUploadTime()}',
-                style: TextStyle(color: Colors.grey[400], fontSize: 14),
-              ),
-            ],
+          const SizedBox(height: 6),
+          Text(
+            'Uploaded ${_getUploadTime()}',
+            style: TextStyle(color: Colors.grey[400], fontSize: 14),
           ),
           const SizedBox(height: 16),
           Row(
@@ -562,6 +569,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
               Expanded(
                 child: _buildInfoItem('Size', widget.file.formattedSize),
               ),
+              const SizedBox(width: 16),
               Expanded(
                 child: _buildInfoItem(
                   'Type',
@@ -572,7 +580,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
               ),
             ],
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Row(
             children: [
               Expanded(
@@ -581,6 +589,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
                   widget.file.filename.split('.').last.toUpperCase(),
                 ),
               ),
+              const SizedBox(width: 16),
               Expanded(
                 child: _buildInfoItem(
                   'Downloads',
@@ -606,13 +615,13 @@ class _PreviewScreenState extends State<PreviewScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
-        const SizedBox(height: 4),
+        Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 13)),
+        const SizedBox(height: 5),
         Text(
           value,
           style: const TextStyle(
             color: Colors.white,
-            fontSize: 14,
+            fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
         ),
@@ -621,15 +630,15 @@ class _PreviewScreenState extends State<PreviewScreen> {
   }
 
   Widget _buildActionButtons() {
-    return Container(
-      padding: const EdgeInsets.all(20.0),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       child: Column(
         children: [
           Row(
             children: [
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.download,
+                  icon: Icons.download_rounded,
                   label: 'Download',
                   onPressed: _isDownloading ? null : _downloadFile,
                   isLoading: _isDownloading,
@@ -639,7 +648,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
               const SizedBox(width: 12),
               Expanded(
                 child: _buildActionButton(
-                  icon: Icons.share,
+                  icon: Icons.share_rounded,
                   label: 'Share',
                   onPressed: _shareFile,
                   isPrimary: false,
@@ -651,12 +660,12 @@ class _PreviewScreenState extends State<PreviewScreen> {
           SizedBox(
             width: double.infinity,
             child: _buildActionButton(
-              icon: Icons.delete_outline,
+              icon: Icons.delete_outline_rounded,
               label: 'Delete File',
               onPressed: _isDeleting ? null : _showDeleteConfirmation,
               isLoading: _isDeleting,
               isPrimary: false,
-              backgroundColor: Colors.red,
+              isDestructive: true,
             ),
           ),
         ],
@@ -670,42 +679,53 @@ class _PreviewScreenState extends State<PreviewScreen> {
     required VoidCallback? onPressed,
     bool isLoading = false,
     bool isPrimary = false,
-    Color? backgroundColor,
+    bool isDestructive = false,
   }) {
-    final bgColor =
-        backgroundColor ??
-        (isPrimary ? const Color(0xFF007AFF) : const Color(0xFF2C2C2E));
+    final Color bgColor;
+    final Color fgColor;
+
+    if (isDestructive) {
+      bgColor = const Color(0xFF442929);
+      fgColor = const Color(0xFFFF6464);
+    } else if (isPrimary) {
+      bgColor = const Color(0xFF007AFF);
+      fgColor = Colors.white;
+    } else {
+      bgColor = const Color(0xFF2C2C2E);
+      fgColor = Colors.white;
+    }
 
     return ElevatedButton(
       onPressed: onPressed,
       style: ElevatedButton.styleFrom(
         backgroundColor: bgColor,
-        foregroundColor: Colors.white,
-        padding: const EdgeInsets.symmetric(vertical: 16.0),
+        foregroundColor: fgColor,
+        padding: const EdgeInsets.symmetric(vertical: 14.0),
         shape: RoundedRectangleBorder(
-          borderRadius: BorderRadius.circular(12.0),
+          borderRadius: BorderRadius.circular(16.0),
         ),
         elevation: 0,
+        disabledBackgroundColor: bgColor.withOpacity(0.5),
       ),
       child: isLoading
-          ? const SizedBox(
-              width: 20,
-              height: 20,
+          ? SizedBox(
+              width: 22,
+              height: 22,
               child: CircularProgressIndicator(
-                strokeWidth: 2,
-                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                strokeWidth: 2.5,
+                valueColor: AlwaysStoppedAnimation<Color>(fgColor),
               ),
             )
           : Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Icon(icon, size: 20),
-                const SizedBox(width: 8),
+                Icon(icon, size: 22),
+                const SizedBox(width: 10),
                 Text(
                   label,
                   style: const TextStyle(
                     fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ],
@@ -816,23 +836,23 @@ class _PreviewScreenState extends State<PreviewScreen> {
   IconData _getFileTypeIconData(AppFileType fileType) {
     switch (fileType) {
       case AppFileType.image:
-        return Icons.image;
+        return Icons.image_rounded;
       case AppFileType.video:
-        return Icons.videocam;
+        return Icons.videocam_rounded;
       case AppFileType.audio:
-        return Icons.music_note;
+        return Icons.music_note_rounded;
       case AppFileType.pdf:
-        return Icons.description;
+        return Icons.picture_as_pdf_rounded;
       case AppFileType.document:
-        return Icons.description;
+        return Icons.description_rounded;
       case AppFileType.spreadsheet:
-        return Icons.table_chart;
+        return Icons.table_chart_rounded;
       case AppFileType.archive:
-        return Icons.archive;
+        return Icons.archive_rounded;
       case AppFileType.text:
-        return Icons.text_snippet;
+        return Icons.text_snippet_rounded;
       default:
-        return Icons.insert_drive_file;
+        return Icons.insert_drive_file_rounded;
     }
   }
 
