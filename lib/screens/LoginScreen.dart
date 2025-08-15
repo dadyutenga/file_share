@@ -244,17 +244,19 @@ class _LoginScreenState extends State<LoginScreen> {
               children: <Widget>[
                 const SizedBox(height: 60.0),
                 // Cloud upload icon
-                Container(
-                  width: 80,
-                  height: 80,
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF007AFF).withOpacity(0.1),
-                    shape: BoxShape.circle,
-                  ),
-                  child: const Icon(
-                    Icons.cloud_upload_outlined,
-                    color: Color(0xFF007AFF),
-                    size: 40.0,
+                Center(
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF007AFF).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Color(0xFF007AFF),
+                      size: 40.0,
+                    ),
                   ),
                 ),
                 const SizedBox(height: 32.0),
@@ -280,7 +282,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 48.0),
-                // Username field with icon
+                // Username field with circular design
                 TextField(
                   controller: _usernameController,
                   enabled: !_isLoading,
@@ -293,25 +295,34 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.grey[500],
                       fontSize: 16.0,
                     ),
-                    prefixIcon: Icon(
-                      Icons.person_outline,
-                      color: Colors.grey[500],
-                      size: 20.0,
+                    prefixIcon: Container(
+                      margin: const EdgeInsets.all(12.0),
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF007AFF).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.person_outline,
+                        color: const Color(0xFF007AFF),
+                        size: 16.0,
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
+                      horizontal: 20.0,
                       vertical: 18.0,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: const BorderSide(
                         color: Color(0xFF007AFF),
                         width: 2.0,
@@ -320,7 +331,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                // Password field with icon and visibility toggle
+                // Password field with circular design and visibility toggle
                 TextField(
                   controller: _passwordController,
                   enabled: !_isLoading,
@@ -334,39 +345,58 @@ class _LoginScreenState extends State<LoginScreen> {
                       color: Colors.grey[500],
                       fontSize: 16.0,
                     ),
-                    prefixIcon: Icon(
-                      Icons.lock_outline,
-                      color: Colors.grey[500],
-                      size: 20.0,
-                    ),
-                    suffixIcon: IconButton(
-                      icon: Icon(
-                        _obscurePassword
-                            ? Icons.visibility_off
-                            : Icons.visibility,
-                        color: Colors.grey[500],
-                        size: 20.0,
+                    prefixIcon: Container(
+                      margin: const EdgeInsets.all(12.0),
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF007AFF).withOpacity(0.1),
+                        shape: BoxShape.circle,
                       ),
-                      onPressed: () {
-                        setState(() {
-                          _obscurePassword = !_obscurePassword;
-                        });
-                      },
+                      child: Icon(
+                        Icons.lock_outline,
+                        color: const Color(0xFF007AFF),
+                        size: 16.0,
+                      ),
+                    ),
+                    suffixIcon: Container(
+                      margin: const EdgeInsets.all(12.0),
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey[500],
+                          size: 16.0,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
                     ),
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
+                      horizontal: 20.0,
                       vertical: 18.0,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: const BorderSide(
                         color: Color(0xFF007AFF),
                         width: 2.0,
@@ -375,7 +405,7 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32.0),
-                // Login button
+                // Login button with circular design
                 SizedBox(
                   height: 54.0,
                   child: ElevatedButton(
@@ -387,7 +417,7 @@ class _LoginScreenState extends State<LoginScreen> {
                         0xFF007AFF,
                       ).withOpacity(0.6),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12.0),
+                        borderRadius: BorderRadius.circular(27.0),
                       ),
                       elevation: 0,
                     ),
@@ -412,14 +442,15 @@ class _LoginScreenState extends State<LoginScreen> {
                   ),
                 ),
                 const SizedBox(height: 32.0),
-                // Register link
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
+                // Register link - Fixed overflow
+                Column(
                   children: [
                     Text(
-                      "Don't have an account? ",
+                      "Don't have an account?",
                       style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                      textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 4.0),
                     GestureDetector(
                       onTap: _isLoading
                           ? null
@@ -439,6 +470,7 @@ class _LoginScreenState extends State<LoginScreen> {
                               ? Colors.grey[600]
                               : const Color(0xFF007AFF),
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],

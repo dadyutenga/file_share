@@ -14,6 +14,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
   final TextEditingController _usernameController = TextEditingController();
   final TextEditingController _passwordController = TextEditingController();
   bool _isLoading = false;
+  bool _obscurePassword = true;
 
   @override
   void dispose() {
@@ -31,12 +32,12 @@ class _RegisterScreenState extends State<RegisterScreen> {
     final passwordError = AuthService.validatePassword(password);
 
     if (usernameError != null) {
-      _showErrorSnackBar(usernameError);
+      _showErrorDialog(usernameError);
       return;
     }
 
     if (passwordError != null) {
-      _showErrorSnackBar(passwordError);
+      _showErrorDialog(passwordError);
       return;
     }
 
@@ -48,15 +49,23 @@ class _RegisterScreenState extends State<RegisterScreen> {
       final response = await AuthService.registerUser(username, password);
 
       if (response.success && response.data != null) {
-        // Registration successful, navigate to home screen
+        // Show success message
+        _showSuccessDialog(
+          'Account created successfully! Welcome to FileShare.',
+        );
+
+        // Navigate to home screen after a short delay
+        await Future.delayed(const Duration(milliseconds: 1500));
         if (mounted) {
           Navigator.pushReplacementNamed(context, AppRoutes.home);
         }
       } else {
-        _showErrorSnackBar(response.message);
+        _showErrorDialog(response.message);
       }
     } catch (e) {
-      _showErrorSnackBar('An unexpected error occurred');
+      _showErrorDialog(
+        'Network error. Please check your connection and try again.',
+      );
     } finally {
       if (mounted) {
         setState(() {
@@ -66,18 +75,150 @@ class _RegisterScreenState extends State<RegisterScreen> {
     }
   }
 
-  void _showErrorSnackBar(String message) {
+  void _showErrorDialog(String message) {
     if (mounted) {
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(
-          content: Text(message),
-          backgroundColor: Colors.red,
-          behavior: SnackBarBehavior.floating,
-          margin: const EdgeInsets.all(16.0),
-          shape: RoundedRectangleBorder(
-            borderRadius: BorderRadius.circular(12.0),
-          ),
-        ),
+      showDialog(
+        context: context,
+        barrierDismissible: true,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: Colors.red.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.red.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.error_outline,
+                      color: Colors.red,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  const Text(
+                    'Registration Failed',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                  ),
+                  const SizedBox(height: 20.0),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () => Navigator.of(context).pop(),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: Colors.red,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 12.0),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(8.0),
+                        ),
+                        elevation: 0,
+                      ),
+                      child: const Text(
+                        'Try Again',
+                        style: TextStyle(
+                          fontSize: 14.0,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
+      );
+    }
+  }
+
+  void _showSuccessDialog(String message) {
+    if (mounted) {
+      showDialog(
+        context: context,
+        barrierDismissible: false,
+        builder: (BuildContext context) {
+          return Dialog(
+            backgroundColor: Colors.transparent,
+            child: Container(
+              padding: const EdgeInsets.all(20.0),
+              decoration: BoxDecoration(
+                color: const Color(0xFF2C2C2E),
+                borderRadius: BorderRadius.circular(16.0),
+                border: Border.all(
+                  color: Colors.green.withOpacity(0.3),
+                  width: 1,
+                ),
+              ),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Container(
+                    width: 60,
+                    height: 60,
+                    decoration: BoxDecoration(
+                      color: Colors.green.withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.check_circle_outline,
+                      color: Colors.green,
+                      size: 30,
+                    ),
+                  ),
+                  const SizedBox(height: 16.0),
+                  const Text(
+                    'Success!',
+                    style: TextStyle(
+                      color: Colors.white,
+                      fontSize: 18.0,
+                      fontWeight: FontWeight.w600,
+                    ),
+                  ),
+                  const SizedBox(height: 8.0),
+                  Text(
+                    message,
+                    textAlign: TextAlign.center,
+                    style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                  ),
+                  const SizedBox(height: 16.0),
+                  const SizedBox(
+                    width: 20,
+                    height: 20,
+                    child: CircularProgressIndicator(
+                      strokeWidth: 2.0,
+                      valueColor: AlwaysStoppedAnimation<Color>(Colors.green),
+                    ),
+                  ),
+                ],
+              ),
+            ),
+          );
+        },
       );
     }
   }
@@ -94,7 +235,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: const Color(0xFF1C1C1E),
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -105,12 +246,22 @@ class _RegisterScreenState extends State<RegisterScreen> {
               children: <Widget>[
                 const SizedBox(height: 60.0),
                 // Cloud upload icon
-                const Icon(
-                  Icons.cloud_upload_outlined,
-                  color: Color(0xFF007AFF),
-                  size: 64.0,
+                Center(
+                  child: Container(
+                    width: 80,
+                    height: 80,
+                    decoration: BoxDecoration(
+                      color: const Color(0xFF007AFF).withOpacity(0.1),
+                      shape: BoxShape.circle,
+                    ),
+                    child: const Icon(
+                      Icons.cloud_upload_outlined,
+                      color: Color(0xFF007AFF),
+                      size: 40.0,
+                    ),
+                  ),
                 ),
-                const SizedBox(height: 40.0),
+                const SizedBox(height: 32.0),
                 // Create Account title
                 const Text(
                   'Create Account',
@@ -118,7 +269,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   style: TextStyle(
                     color: Colors.white,
                     fontSize: 28.0,
-                    fontWeight: FontWeight.w600,
+                    fontWeight: FontWeight.w700,
                   ),
                 ),
                 const SizedBox(height: 8.0),
@@ -133,7 +284,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   ),
                 ),
                 const SizedBox(height: 48.0),
-                // Username field
+                // Username field with circular design
                 TextField(
                   controller: _usernameController,
                   enabled: !_isLoading,
@@ -146,33 +297,47 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: Colors.grey[500],
                       fontSize: 16.0,
                     ),
+                    prefixIcon: Container(
+                      margin: const EdgeInsets.all(12.0),
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF007AFF).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.person_outline,
+                        color: const Color(0xFF007AFF),
+                        size: 16.0,
+                      ),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
+                      horizontal: 20.0,
                       vertical: 18.0,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: const BorderSide(
                         color: Color(0xFF007AFF),
-                        width: 1.0,
+                        width: 2.0,
                       ),
                     ),
                   ),
                 ),
                 const SizedBox(height: 16.0),
-                // Password field
+                // Password field with circular design and visibility toggle
                 TextField(
                   controller: _passwordController,
                   enabled: !_isLoading,
-                  obscureText: true,
+                  obscureText: _obscurePassword,
                   style: const TextStyle(color: Colors.white, fontSize: 16.0),
                   decoration: InputDecoration(
                     filled: true,
@@ -182,68 +347,112 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       color: Colors.grey[500],
                       fontSize: 16.0,
                     ),
+                    prefixIcon: Container(
+                      margin: const EdgeInsets.all(12.0),
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: const Color(0xFF007AFF).withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: Icon(
+                        Icons.lock_outline,
+                        color: const Color(0xFF007AFF),
+                        size: 16.0,
+                      ),
+                    ),
+                    suffixIcon: Container(
+                      margin: const EdgeInsets.all(12.0),
+                      width: 20,
+                      height: 20,
+                      decoration: BoxDecoration(
+                        color: Colors.grey.withOpacity(0.1),
+                        shape: BoxShape.circle,
+                      ),
+                      child: IconButton(
+                        padding: EdgeInsets.zero,
+                        icon: Icon(
+                          _obscurePassword
+                              ? Icons.visibility_off
+                              : Icons.visibility,
+                          color: Colors.grey[500],
+                          size: 16.0,
+                        ),
+                        onPressed: () {
+                          setState(() {
+                            _obscurePassword = !_obscurePassword;
+                          });
+                        },
+                      ),
+                    ),
                     contentPadding: const EdgeInsets.symmetric(
-                      horizontal: 16.0,
+                      horizontal: 20.0,
                       vertical: 18.0,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: BorderSide.none,
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                      borderRadius: BorderRadius.circular(25.0),
                       borderSide: const BorderSide(
                         color: Color(0xFF007AFF),
-                        width: 1.0,
+                        width: 2.0,
                       ),
                     ),
                   ),
                 ),
-                const SizedBox(height: 40.0),
-                // Register button
-                ElevatedButton(
-                  onPressed: _isLoading ? null : _handleRegister,
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF007AFF),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 18.0),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12.0),
+                const SizedBox(height: 32.0),
+                // Register button with circular design
+                SizedBox(
+                  height: 54.0,
+                  child: ElevatedButton(
+                    onPressed: _isLoading ? null : _handleRegister,
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFF007AFF),
+                      foregroundColor: Colors.white,
+                      disabledBackgroundColor: const Color(
+                        0xFF007AFF,
+                      ).withOpacity(0.6),
+                      shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(27.0),
+                      ),
+                      elevation: 0,
                     ),
-                    elevation: 0,
-                  ),
-                  child: _isLoading
-                      ? const SizedBox(
-                          height: 20.0,
-                          width: 20.0,
-                          child: CircularProgressIndicator(
-                            strokeWidth: 2.0,
-                            valueColor: AlwaysStoppedAnimation<Color>(
-                              Colors.white,
+                    child: _isLoading
+                        ? const SizedBox(
+                            height: 20.0,
+                            width: 20.0,
+                            child: CircularProgressIndicator(
+                              strokeWidth: 2.0,
+                              valueColor: AlwaysStoppedAnimation<Color>(
+                                Colors.white,
+                              ),
+                            ),
+                          )
+                        : const Text(
+                            'Register',
+                            style: TextStyle(
+                              fontSize: 16.0,
+                              fontWeight: FontWeight.w600,
                             ),
                           ),
-                        )
-                      : const Text(
-                          'Register',
-                          style: TextStyle(
-                            fontSize: 16.0,
-                            fontWeight: FontWeight.w600,
-                          ),
-                        ),
+                  ),
                 ),
                 const SizedBox(height: 32.0),
-                // Login link - Smooth navigation
-                Wrap(
-                  alignment: WrapAlignment.center,
+                // Login link - Fixed overflow
+                Column(
                   children: [
                     Text(
-                      "Already have an account? ",
+                      "Already have an account?",
                       style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                      textAlign: TextAlign.center,
                     ),
+                    const SizedBox(height: 4.0),
                     GestureDetector(
                       onTap: _isLoading
                           ? null
@@ -254,11 +463,16 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         'Login here',
                         style: TextStyle(
                           color: _isLoading
-                              ? Colors.grey
+                              ? Colors.grey[600]
                               : const Color(0xFF007AFF),
                           fontSize: 14.0,
                           fontWeight: FontWeight.w600,
+                          decoration: TextDecoration.underline,
+                          decorationColor: _isLoading
+                              ? Colors.grey[600]
+                              : const Color(0xFF007AFF),
                         ),
+                        textAlign: TextAlign.center,
                       ),
                     ),
                   ],
