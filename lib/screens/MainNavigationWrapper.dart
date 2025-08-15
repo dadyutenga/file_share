@@ -53,20 +53,8 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       if (token != null) {
         await AuthService.logoutUser(token);
       }
-
-      // Clear session data
-      await SessionManager.clearSession();
-
-      // Navigate to login screen
-      if (mounted) {
-        Navigator.pushNamedAndRemoveUntil(
-          context,
-          AppRoutes.login,
-          (route) => false,
-        );
-      }
-    } catch (e) {
-      // Even if logout API fails, clear local session
+    } finally {
+      // Always clear session and navigate
       await SessionManager.clearSession();
       if (mounted) {
         Navigator.pushNamedAndRemoveUntil(
@@ -83,10 +71,13 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
           context: context,
           builder: (context) => AlertDialog(
             backgroundColor: const Color(0xFF2C2C2E),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(16),
+            ),
             title: const Text('Logout', style: TextStyle(color: Colors.white)),
-            content: const Text(
+            content: Text(
               'Are you sure you want to logout?',
-              style: TextStyle(color: Colors.grey),
+              style: TextStyle(color: Colors.grey[400]),
             ),
             actions: [
               TextButton(
@@ -100,7 +91,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 onPressed: () => Navigator.pop(context, true),
                 child: const Text(
                   'Logout',
-                  style: TextStyle(color: Colors.red),
+                  style: TextStyle(color: Colors.redAccent),
                 ),
               ),
             ],
@@ -114,19 +105,28 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       context: context,
       backgroundColor: Colors.transparent,
       builder: (context) => Container(
+        padding: const EdgeInsets.only(top: 8.0),
         decoration: const BoxDecoration(
           color: Color(0xFF2C2C2E),
           borderRadius: BorderRadius.only(
-            topLeft: Radius.circular(20.0),
-            topRight: Radius.circular(20.0),
+            topLeft: Radius.circular(24.0),
+            topRight: Radius.circular(24.0),
           ),
         ),
         child: SafeArea(
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              // Handle for dragging sheet down
+              Container(
+                width: 40,
+                height: 5,
+                decoration: BoxDecoration(
+                  color: Colors.grey[700],
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
               const SizedBox(height: 20.0),
-              // User info
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Row(
@@ -139,7 +139,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20.0,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                         ),
                       ),
                     ),
@@ -169,15 +169,14 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                   ],
                 ),
               ),
-              const SizedBox(height: 20.0),
-              const Divider(color: Colors.grey, height: 1.0),
-              // Logout option
+              const SizedBox(height: 16.0),
+              const Divider(color: Color(0xFF444444), height: 1.0),
               ListTile(
-                leading: const Icon(Icons.logout, color: Colors.red),
+                leading: const Icon(Icons.logout, color: Colors.redAccent),
                 title: const Text(
                   'Logout',
                   style: TextStyle(
-                    color: Colors.red,
+                    color: Colors.redAccent,
                     fontSize: 16.0,
                     fontWeight: FontWeight.w500,
                   ),
@@ -187,7 +186,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                   _handleLogout();
                 },
               ),
-              const SizedBox(height: 20.0),
+              const SizedBox(height: 16.0),
             ],
           ),
         ),
@@ -201,36 +200,12 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
         statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
       ),
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: const Text(
-          'FileShare',
-          style: TextStyle(
-            color: Colors.white,
-            fontSize: 24.0,
-            fontWeight: FontWeight.w600,
-          ),
-        ),
-        actions: [
-          IconButton(
-            onPressed: _showUserMenu,
-            icon: const Icon(
-              Icons.account_circle_outlined,
-              color: Colors.white,
-              size: 28.0,
-            ),
-          ),
-          const SizedBox(width: 8.0),
-        ],
-      ),
-      body: _screens[_currentIndex],
+      backgroundColor: const Color(0xFF1C1C1E),
+      body: SafeArea(child: _screens[_currentIndex]),
       bottomNavigationBar: CustomBottomNavigation(
         currentIndex: _currentIndex,
         onTap: (index) {
