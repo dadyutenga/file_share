@@ -1,7 +1,0 @@
-add   status  like  welcome  back  after  login 
-implement  we  the  remaining pages 
-the logout
-the  upload  and  preview  
-plus download  of  the  files  
-privacy  toggle  
-the settings  page 
