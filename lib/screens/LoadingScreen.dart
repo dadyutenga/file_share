@@ -22,8 +22,8 @@ class _LoadingScreenState extends State<LoadingScreen>
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
       ),
     );
 
@@ -57,13 +57,13 @@ class _LoadingScreenState extends State<LoadingScreen>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1A1A1A),
+      backgroundColor: Colors.white,
       body: Container(
         decoration: BoxDecoration(
           gradient: LinearGradient(
             begin: Alignment.topCenter,
             end: Alignment.bottomCenter,
-            colors: [const Color(0xFF1A1A1A), const Color(0xFF0D1117)],
+            colors: [Colors.white, Colors.grey[50]!],
           ),
         ),
         child: Center(
@@ -80,11 +80,12 @@ class _LoadingScreenState extends State<LoadingScreen>
                     borderRadius: BorderRadius.circular(20.0),
                     boxShadow: [
                       BoxShadow(
-                        color: const Color(0xFF007AFF).withOpacity(0.3),
+                        color: const Color(0xFF007AFF).withOpacity(0.2),
                         blurRadius: 20.0,
                         offset: const Offset(0, 10),
                       ),
                     ],
+                    color: Colors.white,
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20.0),
@@ -104,10 +105,10 @@ class _LoadingScreenState extends State<LoadingScreen>
                 ),
                 const SizedBox(height: 40.0),
                 // Welcome text
-                const Text(
+                Text(
                   'Welcome to',
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.grey[700],
                     fontSize: 24.0,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.5,
@@ -144,7 +145,7 @@ class _LoadingScreenState extends State<LoadingScreen>
                 Text(
                   'Loading...',
                   style: TextStyle(
-                    color: Colors.grey[400],
+                    color: Colors.grey[600],
                     fontSize: 16.0,
                     fontWeight: FontWeight.w400,
                     letterSpacing: 0.5,

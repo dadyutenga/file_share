@@ -47,11 +47,11 @@ class AppRoutes {
       default:
         return MaterialPageRoute(
           builder: (_) => Scaffold(
-            backgroundColor: const Color(0xFF1A1A1A),
+            backgroundColor: Colors.white,
             body: Center(
               child: Text(
                 'No route defined for ${settings.name}',
-                style: const TextStyle(color: Colors.white),
+                style: const TextStyle(color: Colors.black87),
               ),
             ),
           ),

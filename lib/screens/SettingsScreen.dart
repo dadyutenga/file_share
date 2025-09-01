@@ -109,9 +109,9 @@ class _SettingsScreenState extends State<SettingsScreen> {
     return showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2C2C2E),
-        title: Text(title, style: const TextStyle(color: Colors.white)),
-        content: Text(content, style: TextStyle(color: Colors.grey[400])),
+        backgroundColor: Colors.white,
+        title: Text(title, style: const TextStyle(color: Colors.black87)),
+        content: Text(content, style: TextStyle(color: Colors.grey[600])),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -134,7 +134,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: ListView(
           padding: const EdgeInsets.all(16.0),
@@ -144,7 +144,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
               child: Text(
                 'Settings',
                 style: TextStyle(
-                  color: Colors.white,
+                  color: Colors.black87,
                   fontWeight: FontWeight.bold,
                   fontSize: 32,
                 ),
@@ -157,8 +157,16 @@ class _SettingsScreenState extends State<SettingsScreen> {
             _buildSectionTitle('Account'),
             Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(12),
+                border: Border.all(color: Colors.grey[300]!, width: 1),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.05),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
               ),
               child: Column(
                 children: [
@@ -184,7 +192,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
                           ),
                   ),
                   const Divider(
-                    color: Color(0xFF3A3A3C),
+                    color: Colors.grey,
                     height: 1,
                     indent: 56,
                     endIndent: 16,
@@ -224,7 +232,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             Text(
               _username ?? 'Loading...',
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.black87,
                 fontSize: 20,
                 fontWeight: FontWeight.bold,
               ),
@@ -232,7 +240,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
             const SizedBox(height: 4),
             Text(
               'Free Account',
-              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ],
         ),
@@ -290,7 +298,7 @@ class _SettingsScreenState extends State<SettingsScreen> {
       child: Text(
         title.toUpperCase(),
         style: TextStyle(
-          color: Colors.grey[500],
+          color: Colors.grey[600],
           fontWeight: FontWeight.w600,
           fontSize: 12,
         ),
@@ -308,17 +316,17 @@ class _SettingsScreenState extends State<SettingsScreen> {
   }) {
     return ListTile(
       contentPadding: const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-      leading: Icon(icon, color: color ?? Colors.grey[400]),
+      leading: Icon(icon, color: color ?? Colors.grey[600]),
       title: Text(
         title,
         style: TextStyle(
-          color: color ?? Colors.white,
+          color: color ?? Colors.black87,
           fontSize: 16,
           fontWeight: FontWeight.w500,
         ),
       ),
       subtitle: subtitle != null
-          ? Text(subtitle, style: TextStyle(color: Colors.grey[500]))
+          ? Text(subtitle, style: TextStyle(color: Colors.grey[600]))
           : null,
       trailing: trailing,
       onTap: onTap,
