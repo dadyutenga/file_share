@@ -67,11 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: _loadUserStats,
         color: const Color(0xFF007AFF),
-        backgroundColor: const Color(0xFF2C2C2E),
+        backgroundColor: Colors.grey[100],
         child: _buildBody(),
       ),
     );
@@ -125,7 +125,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           'Welcome Back,',
           style: TextStyle(
-            color: Colors.grey[400],
+            color: Colors.grey[600],
             fontSize: 18,
             fontWeight: FontWeight.w400,
           ),
@@ -133,7 +133,7 @@ class _HomeScreenState extends State<HomeScreen> {
         Text(
           _userStats?.username ?? 'User',
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.black87,
             fontSize: 28,
             fontWeight: FontWeight.bold,
           ),
@@ -154,8 +154,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -173,7 +180,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   axisLineStyle: AxisLineStyle(
                     thickness: 0.2,
                     cornerStyle: CornerStyle.bothCurve,
-                    color: Colors.grey[800],
+                    color: Colors.grey[300]!,
                     thicknessUnit: GaugeSizeUnit.factor,
                   ),
                   pointers: <GaugePointer>[
@@ -205,9 +212,12 @@ class _HomeScreenState extends State<HomeScreen> {
                             ),
                             suffix: '%',
                           ),
-                          const Text(
+                          Text(
                             'Storage Used',
-                            style: TextStyle(fontSize: 14, color: Colors.grey),
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.grey[600],
+                            ),
                           ),
                         ],
                       ),
@@ -238,13 +248,13 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[400])),
+        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
         const SizedBox(height: 4),
         Text(
           value,
           style: const TextStyle(
             fontSize: 16,
-            color: Colors.white,
+            color: Colors.black87,
             fontWeight: FontWeight.w600,
           ),
         ),
@@ -288,8 +298,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -310,7 +327,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 end: value,
                 duration: const Duration(milliseconds: 1000),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black87,
                   // Adjusted font size to prevent overflow
                   fontSize: 22,
                   fontWeight: FontWeight.bold,
@@ -319,7 +336,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 4),
               Text(
                 title,
-                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 // Ensure text does not wrap
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
@@ -342,8 +359,15 @@ class _HomeScreenState extends State<HomeScreen> {
     return Container(
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -364,7 +388,7 @@ class _HomeScreenState extends State<HomeScreen> {
               Text(
                 FileManagementService.formatFileSize(stats.dailyDownloadsUsed),
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black87,
                   fontSize: 20,
                   fontWeight: FontWeight.bold,
                 ),
@@ -372,7 +396,7 @@ class _HomeScreenState extends State<HomeScreen> {
               const SizedBox(height: 4),
               Text(
                 'Daily Usage',
-                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
               const SizedBox(height: 8),
               TweenAnimationBuilder<double>(
@@ -380,7 +404,7 @@ class _HomeScreenState extends State<HomeScreen> {
                 duration: const Duration(milliseconds: 1000),
                 builder: (context, value, child) => LinearProgressIndicator(
                   value: value,
-                  backgroundColor: Colors.grey[800],
+                  backgroundColor: Colors.grey[300],
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                   borderRadius: BorderRadius.circular(10),
                 ),
@@ -411,7 +435,7 @@ class _HomeScreenState extends State<HomeScreen> {
               _errorMessage!,
               textAlign: TextAlign.center,
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.black87,
                 fontSize: 18,
                 fontWeight: FontWeight.w600,
               ),
@@ -419,7 +443,7 @@ class _HomeScreenState extends State<HomeScreen> {
             const SizedBox(height: 12),
             Text(
               'Pull down to refresh the screen.',
-              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
             const SizedBox(height: 24),
             ElevatedButton.icon(

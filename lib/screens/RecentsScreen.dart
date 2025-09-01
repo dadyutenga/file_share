@@ -81,11 +81,11 @@ class _RecentsScreenState extends State<RecentsScreen>
   Widget build(BuildContext context) {
     super.build(context);
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       body: RefreshIndicator(
         onRefresh: _loadUserFiles,
         color: const Color(0xFF007AFF),
-        backgroundColor: const Color(0xFF2C2C2E),
+        backgroundColor: Colors.grey[100],
         child: _buildBody(),
       ),
     );
@@ -96,13 +96,17 @@ class _RecentsScreenState extends State<RecentsScreen>
       physics: const AlwaysScrollableScrollPhysics(),
       slivers: [
         SliverAppBar(
-          backgroundColor: const Color(0xFF1C1C1E),
+          backgroundColor: Colors.white,
           pinned: true,
           floating: true,
           automaticallyImplyLeading: false,
           title: const Text(
             'Your Files',
-            style: TextStyle(fontWeight: FontWeight.bold, fontSize: 24),
+            style: TextStyle(
+              fontWeight: FontWeight.bold,
+              fontSize: 24,
+              color: Colors.black87,
+            ),
           ),
           actions: [_buildViewToggle(), const SizedBox(width: 16)],
         ),
@@ -129,7 +133,7 @@ class _RecentsScreenState extends State<RecentsScreen>
   Widget _buildViewToggle() {
     return Container(
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.grey[100],
         borderRadius: BorderRadius.circular(20),
       ),
       child: Row(
@@ -154,7 +158,7 @@ class _RecentsScreenState extends State<RecentsScreen>
         ),
         child: Icon(
           icon,
-          color: isActive ? Colors.white : Colors.grey[400],
+          color: isActive ? Colors.white : Colors.grey[600],
           size: 20,
         ),
       ),
@@ -165,8 +169,8 @@ class _RecentsScreenState extends State<RecentsScreen>
     return Padding(
       padding: const EdgeInsets.all(16.0),
       child: Shimmer.fromColors(
-        baseColor: const Color(0xFF2C2C2E),
-        highlightColor: const Color(0xFF3A3A3C),
+        baseColor: Colors.grey[100]!,
+        highlightColor: Colors.grey[200]!,
         child: _isGridView
             ? GridView.builder(
                 shrinkWrap: true,
@@ -180,7 +184,7 @@ class _RecentsScreenState extends State<RecentsScreen>
                 itemCount: 8,
                 itemBuilder: (_, __) => Container(
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(16),
                   ),
                 ),
@@ -193,7 +197,7 @@ class _RecentsScreenState extends State<RecentsScreen>
                   height: 80,
                   margin: const EdgeInsets.only(bottom: 12),
                   decoration: BoxDecoration(
-                    color: Colors.black,
+                    color: Colors.white,
                     borderRadius: BorderRadius.circular(12),
                   ),
                 ),
@@ -220,7 +224,7 @@ class _RecentsScreenState extends State<RecentsScreen>
           Text(
             _errorMessage!,
             style: const TextStyle(
-              color: Colors.white,
+              color: Colors.black87,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -228,7 +232,7 @@ class _RecentsScreenState extends State<RecentsScreen>
           const SizedBox(height: 12),
           Text(
             'Pull down to try again.',
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),
         ],
       ),
@@ -251,7 +255,7 @@ class _RecentsScreenState extends State<RecentsScreen>
           const Text(
             'Your storage is empty',
             style: TextStyle(
-              color: Colors.white,
+              color: Colors.black87,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -260,7 +264,7 @@ class _RecentsScreenState extends State<RecentsScreen>
           Text(
             'Go to the Uploads tab to add your first file.',
             textAlign: TextAlign.center,
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),
         ],
       ),
@@ -323,8 +327,15 @@ class _RecentsScreenState extends State<RecentsScreen>
       onTap: () => _openFilePreview(file),
       child: Container(
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2E),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(16.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -354,7 +365,7 @@ class _RecentsScreenState extends State<RecentsScreen>
                   Text(
                     file.filename,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontWeight: FontWeight.w500,
                     ),
                     maxLines: 1,
@@ -366,7 +377,7 @@ class _RecentsScreenState extends State<RecentsScreen>
                     children: [
                       Text(
                         file.formattedSize,
-                        style: TextStyle(color: Colors.grey[400], fontSize: 12),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 12),
                       ),
                       if (file.isPublic)
                         Icon(Icons.public, color: Colors.green[400], size: 14),
@@ -391,8 +402,15 @@ class _RecentsScreenState extends State<RecentsScreen>
         margin: const EdgeInsets.only(bottom: 12.0),
         padding: const EdgeInsets.all(12.0),
         decoration: BoxDecoration(
-          color: const Color(0xFF2C2C2E),
+          color: Colors.white,
           borderRadius: BorderRadius.circular(12.0),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withOpacity(0.1),
+              blurRadius: 10,
+              offset: const Offset(0, 5),
+            ),
+          ],
         ),
         child: Row(
           children: [
@@ -417,7 +435,7 @@ class _RecentsScreenState extends State<RecentsScreen>
                   Text(
                     file.filename,
                     style: const TextStyle(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontSize: 16.0,
                       fontWeight: FontWeight.w500,
                     ),
@@ -426,7 +444,7 @@ class _RecentsScreenState extends State<RecentsScreen>
                   const SizedBox(height: 6.0),
                   Text(
                     '${file.formattedSize} • ${file.formattedUploadTime}',
-                    style: TextStyle(color: Colors.grey[400], fontSize: 12.0),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 12.0),
                   ),
                 ],
               ),

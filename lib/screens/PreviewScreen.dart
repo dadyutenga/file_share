@@ -219,16 +219,22 @@ class _PreviewScreenState extends State<PreviewScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2C2C2E),
-        title: const Text('Delete File', style: TextStyle(color: Colors.white)),
+        backgroundColor: Colors.white,
+        title: const Text(
+          'Delete File',
+          style: TextStyle(color: Colors.black87),
+        ),
         content: Text(
           'Are you sure you want to delete "${widget.file.filename}"? This action cannot be undone.',
-          style: TextStyle(color: Colors.grey[400]),
+          style: const TextStyle(color: Color(0xFF757575)),
         ),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context),
-            child: const Text('Cancel', style: TextStyle(color: Colors.grey)),
+            child: const Text(
+              'Cancel',
+              style: TextStyle(color: Color(0xFF9E9E9E)),
+            ),
           ),
           TextButton(
             onPressed: () {
@@ -245,7 +251,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       body: SafeArea(
         child: Column(
@@ -261,16 +267,16 @@ class _PreviewScreenState extends State<PreviewScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.arrow_back, color: Colors.white),
+        icon: const Icon(Icons.arrow_back, color: Colors.black87),
         onPressed: () => Navigator.pop(context),
       ),
       title: Text(
         widget.file.filename,
         style: const TextStyle(
-          color: Colors.white,
+          color: Colors.black87,
           fontSize: 20,
           fontWeight: FontWeight.w600,
         ),
@@ -279,7 +285,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
       ),
       actions: [
         IconButton(
-          icon: const Icon(Icons.more_vert, color: Colors.white),
+          icon: const Icon(Icons.more_vert, color: Colors.black87),
           onPressed: _showFileDetails,
         ),
       ],
@@ -293,8 +299,15 @@ class _PreviewScreenState extends State<PreviewScreen> {
       width: double.infinity,
       margin: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 10.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: ClipRRect(
         borderRadius: BorderRadius.circular(20.0),
@@ -315,7 +328,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
               SizedBox(height: 20),
               Text(
                 'Loading preview...',
-                style: TextStyle(color: Colors.grey, fontSize: 16),
+                style: TextStyle(color: Color(0xFF757575), fontSize: 16),
               ),
             ],
           ),
@@ -330,16 +343,16 @@ class _PreviewScreenState extends State<PreviewScreen> {
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              Icon(Icons.error_outline, color: Colors.red[400], size: 64),
+              Icon(Icons.error_outline, color: Color(0xFFEF5350), size: 64),
               const SizedBox(height: 20),
               Text(
                 'Preview not available',
-                style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                style: TextStyle(color: Color(0xFF757575), fontSize: 16),
               ),
               const SizedBox(height: 8),
               Text(
                 _errorMessage!,
-                style: TextStyle(color: Colors.grey[500], fontSize: 14),
+                style: TextStyle(color: Color(0xFF9E9E9E), fontSize: 14),
                 textAlign: TextAlign.center,
               ),
             ],
@@ -521,7 +534,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
             Text(
               typeName,
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.black87,
                 fontSize: 18,
                 fontWeight: FontWeight.w500,
               ),
@@ -529,7 +542,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
             const SizedBox(height: 8),
             Text(
               'Download to view this file',
-              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+              style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
           ],
         ),
@@ -542,8 +555,15 @@ class _PreviewScreenState extends State<PreviewScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 20.0),
       padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
@@ -551,7 +571,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
           Text(
             widget.file.filename,
             style: const TextStyle(
-              color: Colors.white,
+              color: Colors.black87,
               fontSize: 18,
               fontWeight: FontWeight.w600,
             ),
@@ -561,7 +581,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
           const SizedBox(height: 6),
           Text(
             'Uploaded ${_getUploadTime()}',
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            style: const TextStyle(color: Color(0xFF757575), fontSize: 14),
           ),
           const SizedBox(height: 16),
           Row(
@@ -615,12 +635,15 @@ class _PreviewScreenState extends State<PreviewScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 13)),
+        Text(
+          label,
+          style: const TextStyle(color: Color(0xFF757575), fontSize: 13),
+        ),
         const SizedBox(height: 5),
         Text(
           value,
           style: const TextStyle(
-            color: Colors.white,
+            color: Colors.black87,
             fontSize: 15,
             fontWeight: FontWeight.w500,
           ),
@@ -683,16 +706,20 @@ class _PreviewScreenState extends State<PreviewScreen> {
   }) {
     final Color bgColor;
     final Color fgColor;
+    final Color disabledBgColor;
 
     if (isDestructive) {
       bgColor = const Color(0xFF442929);
       fgColor = const Color(0xFFFF6464);
+      disabledBgColor = const Color(0x80442929); // 50% opacity of 0xFF442929
     } else if (isPrimary) {
       bgColor = const Color(0xFF007AFF);
       fgColor = Colors.white;
+      disabledBgColor = const Color(0x80007AFF); // 50% opacity of 0xFF007AFF
     } else {
-      bgColor = const Color(0xFF2C2C2E);
-      fgColor = Colors.white;
+      bgColor = const Color(0xFFF5F5F5); // Light grey for light theme
+      fgColor = Colors.black87;
+      disabledBgColor = const Color(0x80F5F5F5); // 50% opacity of 0xFFF5F5F5
     }
 
     return ElevatedButton(
@@ -705,7 +732,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
           borderRadius: BorderRadius.circular(16.0),
         ),
         elevation: 0,
-        disabledBackgroundColor: bgColor.withOpacity(0.5),
+        disabledBackgroundColor: disabledBgColor,
       ),
       child: isLoading
           ? SizedBox(
@@ -737,10 +764,10 @@ class _PreviewScreenState extends State<PreviewScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2C2C2E),
+        backgroundColor: Colors.white,
         title: const Text(
           'File Details',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black87),
         ),
         content: Column(
           mainAxisSize: MainAxisSize.min,
@@ -772,7 +799,7 @@ class _PreviewScreenState extends State<PreviewScreen> {
 
   Widget _buildDetailRow(String label, String value) {
     return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 4),
+      padding: const EdgeInsets.symmetric(vertical: 4.0),
       child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
@@ -780,13 +807,13 @@ class _PreviewScreenState extends State<PreviewScreen> {
             width: 80,
             child: Text(
               '$label:',
-              style: TextStyle(color: Colors.grey[400], fontSize: 14),
+              style: const TextStyle(color: Color(0xFF757575), fontSize: 14),
             ),
           ),
           Expanded(
             child: Text(
               value,
-              style: const TextStyle(color: Colors.white, fontSize: 14),
+              style: const TextStyle(color: Colors.black87, fontSize: 14),
             ),
           ),
         ],

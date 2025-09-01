@@ -39,22 +39,24 @@ class _UploadsScreenState extends State<UploadsScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       appBar: _buildAppBar(),
       body: _buildBody(),
-      floatingActionButton: _buildFloatingActionButton(),
+      floatingActionButton: _selectedFiles.isEmpty
+          ? _buildFloatingActionButton()
+          : null, // Hide FAB when files are selected to prevent overlap
     );
   }
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
       title: const Text(
         'Upload Files',
         style: TextStyle(
-          color: Colors.white,
+          color: Colors.black87,
           fontSize: 22,
           fontWeight: FontWeight.bold,
         ),
@@ -108,7 +110,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
               width: 140,
               height: 140,
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E),
+                color: Colors.grey[100],
                 shape: BoxShape.circle,
               ),
               child: const Icon(
@@ -121,7 +123,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
             const Text(
               'No Files Selected',
               style: TextStyle(
-                color: Colors.white,
+                color: Colors.black87,
                 fontSize: 22,
                 fontWeight: FontWeight.bold,
               ),
@@ -129,7 +131,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
             const SizedBox(height: 12),
             Text(
               'Tap the + button to select files you want to upload.',
-              style: TextStyle(color: Colors.grey[400], fontSize: 16),
+              style: TextStyle(color: Colors.grey[600], fontSize: 16),
               textAlign: TextAlign.center,
             ),
             const SizedBox(height: 40),
@@ -180,8 +182,15 @@ class _UploadsScreenState extends State<UploadsScreen> {
       margin: const EdgeInsets.fromLTRB(16, 16, 16, 8),
       padding: const EdgeInsets.all(16.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(24.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -192,7 +201,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
               Text(
                 '${_selectedFiles.length} ${_selectedFiles.length == 1 ? "file" : "files"} selected',
                 style: const TextStyle(
-                  color: Colors.white,
+                  color: Colors.black87,
                   fontSize: 16,
                   fontWeight: FontWeight.w600,
                 ),
@@ -200,7 +209,7 @@ class _UploadsScreenState extends State<UploadsScreen> {
               const SizedBox(height: 6),
               Text(
                 'Total size: ${FileManagementService.formatFileSize(totalSize)}',
-                style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                style: TextStyle(color: Colors.grey[600], fontSize: 14),
               ),
             ],
           ),
@@ -230,8 +239,15 @@ class _UploadsScreenState extends State<UploadsScreen> {
       margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 6),
       padding: const EdgeInsets.all(12.0),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(20.0),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
         border: Border.all(
           color: _getStatusColor(file.uploadStatus).withOpacity(0.4),
           width: 1,
@@ -257,22 +273,28 @@ class _UploadsScreenState extends State<UploadsScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
-                  file.name,
-                  style: const TextStyle(
-                    color: Colors.white,
-                    fontSize: 16,
-                    fontWeight: FontWeight.w500,
+                Flexible(
+                  child: Text(
+                    file.name,
+                    style: const TextStyle(
+                      color: Colors.black87,
+                      fontSize: 16,
+                      fontWeight: FontWeight.w500,
+                    ),
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
                   ),
-                  maxLines: 1,
-                  overflow: TextOverflow.ellipsis,
                 ),
                 const SizedBox(height: 6),
                 Row(
                   children: [
-                    Text(
-                      FileManagementService.formatFileSize(file.size),
-                      style: TextStyle(color: Colors.grey[400], fontSize: 13),
+                    Flexible(
+                      child: Text(
+                        FileManagementService.formatFileSize(file.size),
+                        style: TextStyle(color: Colors.grey[600], fontSize: 13),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
                     ),
                     const SizedBox(width: 12),
                     Container(
@@ -293,6 +315,8 @@ class _UploadsScreenState extends State<UploadsScreen> {
                           fontSize: 12,
                           fontWeight: FontWeight.w600,
                         ),
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
                       ),
                     ),
                   ],
@@ -496,14 +520,14 @@ class _UploadsScreenState extends State<UploadsScreen> {
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFF2C2C2E),
+            backgroundColor: Colors.white,
             title: const Text(
               'Large Upload',
-              style: TextStyle(color: Colors.white),
+              style: TextStyle(color: Colors.black87),
             ),
             content: Text(
               'You are about to upload ${FileManagementService.formatFileSize(totalSize)} of data. This may take a while and use significant bandwidth. Continue?',
-              style: TextStyle(color: Colors.grey[400]),
+              style: TextStyle(color: Colors.grey[600]),
             ),
             actions: [
               TextButton(

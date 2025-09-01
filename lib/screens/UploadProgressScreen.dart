@@ -263,7 +263,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
         }
       },
       child: Scaffold(
-        backgroundColor: const Color(0xFF1C1C1E),
+        backgroundColor: Colors.white,
         appBar: _buildAppBar(),
         body: _buildBody(),
       ),
@@ -272,10 +272,10 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
 
   PreferredSizeWidget _buildAppBar() {
     return AppBar(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       elevation: 0,
       leading: IconButton(
-        icon: const Icon(Icons.close, color: Colors.white),
+        icon: const Icon(Icons.close, color: Colors.black87),
         onPressed: () {
           if (_isUploading) {
             _showCancelDialog();
@@ -287,7 +287,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
       title: const Text(
         'Uploading',
         style: TextStyle(
-          color: Colors.white,
+          color: Colors.black87,
           fontSize: 18,
           fontWeight: FontWeight.w600,
         ),
@@ -324,8 +324,15 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.1),
+            blurRadius: 10,
+            offset: const Offset(0, 5),
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -352,7 +359,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
                       ? _currentFileName
                       : currentFile.name,
                   style: const TextStyle(
-                    color: Colors.white,
+                    color: Colors.black87,
                     fontSize: 16,
                     fontWeight: FontWeight.w500,
                   ),
@@ -362,7 +369,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
                 const SizedBox(height: 4),
                 Text(
                   FileManagementService.formatFileSize(currentFile.size),
-                  style: TextStyle(color: Colors.grey[400], fontSize: 14),
+                  style: TextStyle(color: Colors.grey[600], fontSize: 14),
                 ),
               ],
             ),
@@ -381,7 +388,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
             Text(
               '${(_overallProgress * 100).round()}%',
               style: const TextStyle(
-                color: Colors.white,
+                color: Colors.black87,
                 fontSize: 32,
                 fontWeight: FontWeight.w700,
               ),
@@ -389,7 +396,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
             if (_uploadSpeed.isNotEmpty)
               Text(
                 _uploadSpeed,
-                style: TextStyle(color: Colors.grey[400], fontSize: 16),
+                style: TextStyle(color: Colors.grey[600], fontSize: 16),
               ),
           ],
         ),
@@ -398,7 +405,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
           borderRadius: BorderRadius.circular(4),
           child: LinearProgressIndicator(
             value: _overallProgress,
-            backgroundColor: const Color(0xFF3A3A3C),
+            backgroundColor: Colors.grey[300],
             valueColor: const AlwaysStoppedAnimation<Color>(Color(0xFF007AFF)),
             minHeight: 8,
           ),
@@ -407,7 +414,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
           const SizedBox(height: 12),
           Text(
             'Estimated time remaining: $_timeRemaining',
-            style: TextStyle(color: Colors.grey[400], fontSize: 14),
+            style: TextStyle(color: Colors.grey[600], fontSize: 14),
           ),
         ],
       ],
@@ -450,7 +457,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
           ),
         ),
         const SizedBox(height: 4),
-        Text(label, style: TextStyle(color: Colors.grey[400], fontSize: 12)),
+        Text(label, style: TextStyle(color: Colors.grey[600], fontSize: 12)),
       ],
     );
   }
@@ -464,7 +471,7 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
             child: OutlinedButton(
               onPressed: _showCancelDialog,
               style: OutlinedButton.styleFrom(
-                foregroundColor: Colors.white,
+                foregroundColor: Colors.black87,
                 side: const BorderSide(color: Colors.grey),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(
@@ -508,10 +515,10 @@ class _UploadProgressScreenState extends State<UploadProgressScreen> {
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        backgroundColor: const Color(0xFF2C2C2E),
+        backgroundColor: Colors.white,
         title: const Text(
           'Cancel Upload',
-          style: TextStyle(color: Colors.white),
+          style: TextStyle(color: Colors.black87),
         ),
         content: const Text(
           'Are you sure you want to cancel the upload? All progress will be lost.',
