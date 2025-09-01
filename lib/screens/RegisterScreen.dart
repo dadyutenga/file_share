@@ -259,19 +259,39 @@ class _RegisterScreenState extends State<RegisterScreen> {
               crossAxisAlignment: CrossAxisAlignment.stretch,
               children: <Widget>[
                 const SizedBox(height: 60.0),
-                // Cloud upload icon
+                // App logo/icon
                 Center(
                   child: Container(
-                    width: 80,
-                    height: 80,
+                    width: 120.0,
+                    height: 120.0,
                     decoration: BoxDecoration(
-                      color: const Color(0xFF007AFF).withOpacity(0.1),
-                      shape: BoxShape.circle,
+                      borderRadius: BorderRadius.circular(20.0),
+                      boxShadow: [
+                        BoxShadow(
+                          color: const Color(0xFF007AFF).withOpacity(0.2),
+                          blurRadius: 20.0,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                      color: Colors.white,
                     ),
-                    child: const Icon(
-                      Icons.cloud_upload_outlined,
-                      color: Color(0xFF007AFF),
-                      size: 40.0,
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(20.0),
+                      child: Container(
+                        color: Colors.white, // Ensure white background
+                        child: Image.asset(
+                          'assets/icon/auth.png',
+                          fit: BoxFit.contain,
+                          errorBuilder: (context, error, stackTrace) {
+                            // Fallback to icon if image fails to load
+                            return const Icon(
+                              Icons.person_add,
+                              color: Color(0xFF007AFF),
+                              size: 80.0,
+                            );
+                          },
+                        ),
+                      ),
                     ),
                   ),
                 ),
