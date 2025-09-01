@@ -70,14 +70,17 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     return await showDialog<bool>(
           context: context,
           builder: (context) => AlertDialog(
-            backgroundColor: const Color(0xFF2C2C2E),
+            backgroundColor: Colors.white,
             shape: RoundedRectangleBorder(
               borderRadius: BorderRadius.circular(16),
             ),
-            title: const Text('Logout', style: TextStyle(color: Colors.white)),
+            title: const Text(
+              'Logout',
+              style: TextStyle(color: Colors.black87),
+            ),
             content: Text(
               'Are you sure you want to logout?',
-              style: TextStyle(color: Colors.grey[400]),
+              style: TextStyle(color: Colors.grey[600]),
             ),
             actions: [
               TextButton(
@@ -107,7 +110,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
       builder: (context) => Container(
         padding: const EdgeInsets.only(top: 8.0),
         decoration: const BoxDecoration(
-          color: Color(0xFF2C2C2E),
+          color: Colors.white,
           borderRadius: BorderRadius.only(
             topLeft: Radius.circular(24.0),
             topRight: Radius.circular(24.0),
@@ -122,7 +125,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 width: 40,
                 height: 5,
                 decoration: BoxDecoration(
-                  color: Colors.grey[700],
+                  color: Colors.grey[300],
                   borderRadius: BorderRadius.circular(12),
                 ),
               ),
@@ -151,7 +154,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                           Text(
                             _username ?? 'User',
                             style: const TextStyle(
-                              color: Colors.white,
+                              color: Colors.black87,
                               fontSize: 18.0,
                               fontWeight: FontWeight.w600,
                             ),
@@ -159,7 +162,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                           Text(
                             'Manage your account',
                             style: TextStyle(
-                              color: Colors.grey[400],
+                              color: Colors.grey[600],
                               fontSize: 14.0,
                             ),
                           ),
@@ -170,7 +173,7 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
                 ),
               ),
               const SizedBox(height: 16.0),
-              const Divider(color: Color(0xFF444444), height: 1.0),
+              const Divider(color: Color(0xFFE0E0E0), height: 1.0),
               ListTile(
                 leading: const Icon(Icons.logout, color: Colors.redAccent),
                 title: const Text(
@@ -199,12 +202,13 @@ class _MainNavigationWrapperState extends State<MainNavigationWrapper> {
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
       ),
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       body: SafeArea(child: _screens[_currentIndex]),
       bottomNavigationBar: CustomBottomNavigation(
         currentIndex: _currentIndex,

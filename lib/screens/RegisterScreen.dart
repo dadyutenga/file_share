@@ -86,12 +86,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Container(
               padding: const EdgeInsets.all(20.0),
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16.0),
                 border: Border.all(
                   color: Colors.red.withOpacity(0.3),
                   width: 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -113,7 +120,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const Text(
                     'Registration Failed',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontSize: 18.0,
                       fontWeight: FontWeight.w600,
                     ),
@@ -122,7 +129,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     message,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14.0),
                   ),
                   const SizedBox(height: 20.0),
                   SizedBox(
@@ -167,12 +174,19 @@ class _RegisterScreenState extends State<RegisterScreen> {
             child: Container(
               padding: const EdgeInsets.all(20.0),
               decoration: BoxDecoration(
-                color: const Color(0xFF2C2C2E),
+                color: Colors.white,
                 borderRadius: BorderRadius.circular(16.0),
                 border: Border.all(
                   color: Colors.green.withOpacity(0.3),
                   width: 1,
                 ),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withOpacity(0.1),
+                    blurRadius: 10,
+                    offset: const Offset(0, 5),
+                  ),
+                ],
               ),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
@@ -194,7 +208,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   const Text(
                     'Success!',
                     style: TextStyle(
-                      color: Colors.white,
+                      color: Colors.black87,
                       fontSize: 18.0,
                       fontWeight: FontWeight.w600,
                     ),
@@ -203,7 +217,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   Text(
                     message,
                     textAlign: TextAlign.center,
-                    style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                    style: TextStyle(color: Colors.grey[600], fontSize: 14.0),
                   ),
                   const SizedBox(height: 16.0),
                   const SizedBox(
@@ -229,13 +243,13 @@ class _RegisterScreenState extends State<RegisterScreen> {
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.light,
-        statusBarBrightness: Brightness.dark,
+        statusBarIconBrightness: Brightness.dark,
+        statusBarBrightness: Brightness.light,
       ),
     );
 
     return Scaffold(
-      backgroundColor: const Color(0xFF1C1C1E),
+      backgroundColor: Colors.white,
       body: SafeArea(
         child: Center(
           child: SingleChildScrollView(
@@ -267,7 +281,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   'Create Account',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.white,
+                    color: Colors.black87,
                     fontSize: 28.0,
                     fontWeight: FontWeight.w700,
                   ),
@@ -278,7 +292,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   'Join FileShare to start sharing files',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    color: Colors.grey[400],
+                    color: Colors.grey[600],
                     fontSize: 16.0,
                     fontWeight: FontWeight.w400,
                   ),
@@ -288,10 +302,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                 TextField(
                   controller: _usernameController,
                   enabled: !_isLoading,
-                  style: const TextStyle(color: Colors.white, fontSize: 16.0),
+                  style: const TextStyle(color: Colors.black87, fontSize: 16.0),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: const Color(0xFF2C2C2E),
+                    fillColor: Colors.grey[50],
                     hintText: 'Username',
                     hintStyle: TextStyle(
                       color: Colors.grey[500],
@@ -316,15 +330,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       vertical: 18.0,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
+                      borderRadius: BorderRadius.circular(12.0),
                       borderSide: const BorderSide(
                         color: Color(0xFF007AFF),
                         width: 2.0,
@@ -338,10 +352,10 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   controller: _passwordController,
                   enabled: !_isLoading,
                   obscureText: _obscurePassword,
-                  style: const TextStyle(color: Colors.white, fontSize: 16.0),
+                  style: const TextStyle(color: Colors.black87, fontSize: 16.0),
                   decoration: InputDecoration(
                     filled: true,
-                    fillColor: const Color(0xFF2C2C2E),
+                    fillColor: Colors.grey[50],
                     hintText: 'Password',
                     hintStyle: TextStyle(
                       color: Colors.grey[500],
@@ -390,15 +404,15 @@ class _RegisterScreenState extends State<RegisterScreen> {
                       vertical: 18.0,
                     ),
                     border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
                     enabledBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
-                      borderSide: BorderSide.none,
+                      borderRadius: BorderRadius.circular(12.0),
+                      borderSide: BorderSide(color: Colors.grey[300]!),
                     ),
                     focusedBorder: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(25.0),
+                      borderRadius: BorderRadius.circular(12.0),
                       borderSide: const BorderSide(
                         color: Color(0xFF007AFF),
                         width: 2.0,
@@ -419,9 +433,9 @@ class _RegisterScreenState extends State<RegisterScreen> {
                         0xFF007AFF,
                       ).withOpacity(0.6),
                       shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(27.0),
+                        borderRadius: BorderRadius.circular(12.0),
                       ),
-                      elevation: 0,
+                      elevation: 2,
                     ),
                     child: _isLoading
                         ? const SizedBox(
@@ -449,7 +463,7 @@ class _RegisterScreenState extends State<RegisterScreen> {
                   children: [
                     Text(
                       "Already have an account?",
-                      style: TextStyle(color: Colors.grey[400], fontSize: 14.0),
+                      style: TextStyle(color: Colors.grey[600], fontSize: 14.0),
                       textAlign: TextAlign.center,
                     ),
                     const SizedBox(height: 4.0),

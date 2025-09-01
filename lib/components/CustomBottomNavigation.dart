@@ -15,14 +15,14 @@ class CustomBottomNavigation extends StatelessWidget {
     return Container(
       height: 80,
       decoration: BoxDecoration(
-        color: const Color(0xFF2C2C2E),
+        color: Colors.white,
         borderRadius: const BorderRadius.only(
           topLeft: Radius.circular(24),
           topRight: Radius.circular(24),
         ),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.2),
+            color: Colors.black.withOpacity(0.1),
             blurRadius: 10,
             offset: const Offset(0, -5),
           ),
@@ -71,7 +71,7 @@ class CustomBottomNavigation extends StatelessWidget {
     final bool isSelected = currentIndex == index;
     final Color color = isSelected
         ? const Color(0xFF007AFF)
-        : Colors.grey[400]!;
+        : Colors.grey[600]!;
 
     return Expanded(
       child: GestureDetector(
