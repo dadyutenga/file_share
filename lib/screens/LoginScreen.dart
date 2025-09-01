@@ -260,21 +260,25 @@ class _LoginScreenState extends State<LoginScreen> {
                 // App logo/icon
                 Center(
                   child: Container(
-                    width: 120.0,
-                    height: 120.0,
+                    width: 160.0, // Increased from 120.0
+                    height: 160.0, // Increased from 120.0
                     decoration: BoxDecoration(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(
+                        28.0,
+                      ), // Increased from 20.0
                       boxShadow: [
                         BoxShadow(
                           color: const Color(0xFF007AFF).withOpacity(0.2),
-                          blurRadius: 20.0,
-                          offset: const Offset(0, 10),
+                          blurRadius: 25.0, // Increased from 20.0
+                          offset: const Offset(0, 12), // Increased from (0, 10)
                         ),
                       ],
                       color: Colors.white,
                     ),
                     child: ClipRRect(
-                      borderRadius: BorderRadius.circular(20.0),
+                      borderRadius: BorderRadius.circular(
+                        28.0,
+                      ), // Increased from 20.0
                       child: Container(
                         color: Colors.white, // Ensure white background
                         child: Image.asset(
@@ -285,7 +289,7 @@ class _LoginScreenState extends State<LoginScreen> {
                             return const Icon(
                               Icons.login,
                               color: Color(0xFF007AFF),
-                              size: 80.0,
+                              size: 100.0, // Increased from 80.0
                             );
                           },
                         ),
@@ -304,18 +308,9 @@ class _LoginScreenState extends State<LoginScreen> {
                     fontWeight: FontWeight.w700,
                   ),
                 ),
-                const SizedBox(height: 8.0),
-                // Subtitle
-                Text(
-                  'Login to continue with FileShare',
-                  textAlign: TextAlign.center,
-                  style: TextStyle(
-                    color: Colors.grey[600],
-                    fontSize: 16.0,
-                    fontWeight: FontWeight.w400,
-                  ),
-                ),
-                const SizedBox(height: 48.0),
+                const SizedBox(
+                  height: 48.0,
+                ), // Increased spacing to maintain visual balance
                 // Username field with circular design
                 TextField(
                   controller: _usernameController,
