@@ -67,11 +67,11 @@ class _HomeScreenState extends State<HomeScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: Colors.grey[50],
       body: RefreshIndicator(
         onRefresh: _loadUserStats,
         color: const Color(0xFF007AFF),
-        backgroundColor: Colors.grey[100],
+        backgroundColor: Colors.white,
         child: _buildBody(),
       ),
     );
@@ -89,8 +89,11 @@ class _HomeScreenState extends State<HomeScreen> {
     }
 
     if (_userStats == null) {
-      return const Center(
-        child: Text('No data available.', style: TextStyle(color: Colors.grey)),
+      return Center(
+        child: Text(
+          'No data available.',
+          style: TextStyle(color: Colors.grey[600]),
+        ),
       );
     }
 
@@ -99,18 +102,18 @@ class _HomeScreenState extends State<HomeScreen> {
       key: _animationKey,
       child: ListView(
         physics: const AlwaysScrollableScrollPhysics(),
-        padding: const EdgeInsets.all(20.0),
+        padding: const EdgeInsets.symmetric(horizontal: 20.0, vertical: 16.0),
         children: AnimationConfiguration.toStaggeredList(
-          duration: const Duration(milliseconds: 375),
+          duration: const Duration(milliseconds: 400),
           childAnimationBuilder: (widget) => SlideAnimation(
-            verticalOffset: 50.0,
+            verticalOffset: 60.0,
             child: FadeInAnimation(child: widget),
           ),
           children: [
             _buildWelcomeHeader(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             _buildStorageGaugeCard(),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             _buildStatsGrid(),
           ],
         ),
@@ -119,26 +122,30 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   Widget _buildWelcomeHeader() {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Text(
-          'Welcome Back,',
-          style: TextStyle(
-            color: Colors.grey[600],
-            fontSize: 18,
-            fontWeight: FontWeight.w400,
+    return Padding(
+      padding: const EdgeInsets.only(top: 16.0),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Welcome Back,',
+            style: TextStyle(
+              color: Colors.grey[600],
+              fontSize: 18,
+              fontWeight: FontWeight.w500,
+            ),
           ),
-        ),
-        Text(
-          _userStats?.username ?? 'User',
-          style: const TextStyle(
-            color: Colors.black87,
-            fontSize: 28,
-            fontWeight: FontWeight.bold,
+          const SizedBox(height: 4),
+          Text(
+            _userStats?.username ?? 'User',
+            style: const TextStyle(
+              color: Colors.black87,
+              fontSize: 32,
+              fontWeight: FontWeight.bold,
+            ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 
@@ -155,12 +162,12 @@ class _HomeScreenState extends State<HomeScreen> {
       padding: const EdgeInsets.all(24.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(24.0),
+        borderRadius: BorderRadius.circular(28.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
-            offset: const Offset(0, 5),
+            color: Colors.black.withOpacity(0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
           ),
         ],
       ),
@@ -180,7 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
                   axisLineStyle: AxisLineStyle(
                     thickness: 0.2,
                     cornerStyle: CornerStyle.bothCurve,
-                    color: Colors.grey[300]!,
+                    color: Colors.grey[200]!,
                     thicknessUnit: GaugeSizeUnit.factor,
                   ),
                   pointers: <GaugePointer>[
@@ -190,9 +197,12 @@ class _HomeScreenState extends State<HomeScreen> {
                       width: 0.2,
                       sizeUnit: GaugeSizeUnit.factor,
                       gradient: SweepGradient(
-                        colors: <Color>[color.withOpacity(0.8), color],
+                        colors: <Color>[color.withOpacity(0.7), color],
                         stops: const <double>[0.25, 0.75],
                       ),
+                      enableAnimation: true,
+                      animationDuration: 1200,
+                      animationType: AnimationType.ease,
                     ),
                   ],
                   annotations: <GaugeAnnotation>[
@@ -206,17 +216,19 @@ class _HomeScreenState extends State<HomeScreen> {
                             end: percentage,
                             duration: const Duration(milliseconds: 1200),
                             style: TextStyle(
-                              fontSize: 40,
+                              fontSize: 44,
                               fontWeight: FontWeight.bold,
                               color: color,
                             ),
                             suffix: '%',
                           ),
+                          const SizedBox(height: 4),
                           Text(
                             'Storage Used',
                             style: TextStyle(
                               fontSize: 14,
                               color: Colors.grey[600],
+                              fontWeight: FontWeight.w500,
                             ),
                           ),
                         ],
@@ -227,7 +239,7 @@ class _HomeScreenState extends State<HomeScreen> {
               ],
             ),
           ),
-          const SizedBox(height: 20),
+          const SizedBox(height: 24),
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
@@ -248,8 +260,16 @@ class _HomeScreenState extends State<HomeScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.center,
       children: [
-        Text(label, style: TextStyle(fontSize: 12, color: Colors.grey[600])),
-        const SizedBox(height: 4),
+        Text(
+          label.toUpperCase(),
+          style: TextStyle(
+            fontSize: 11,
+            color: Colors.grey[500],
+            fontWeight: FontWeight.w600,
+            letterSpacing: 0.5,
+          ),
+        ),
+        const SizedBox(height: 6),
         Text(
           value,
           style: const TextStyle(
@@ -270,19 +290,19 @@ class _HomeScreenState extends State<HomeScreen> {
       crossAxisCount: 2,
       crossAxisSpacing: 16,
       mainAxisSpacing: 16,
-      childAspectRatio: 1.0, // Adjusted for better spacing, making cards square
+      childAspectRatio: 1.0,
       children: [
         _buildStatCard(
           'Total Files',
           stats.totalFiles.toDouble(),
-          Icons.insert_drive_file,
+          Icons.insert_drive_file_rounded,
           const Color(0xFF007AFF),
         ),
         _buildStatCard(
           'Total Downloads',
           stats.totalDownloads.toDouble(),
-          Icons.file_download_done,
-          Colors.green,
+          Icons.file_download_done_rounded,
+          const Color(0xFF34C759),
         ),
         _buildDailyDownloadCard(stats),
       ],
@@ -296,30 +316,30 @@ class _HomeScreenState extends State<HomeScreen> {
     Color color,
   ) {
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.0),
+        borderRadius: BorderRadius.circular(24.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 15,
             offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
-              shape: BoxShape.circle,
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(icon, color: color, size: 20),
+            child: Icon(icon, color: color, size: 24),
           ),
-          const Spacer(),
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -328,16 +348,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 duration: const Duration(milliseconds: 1000),
                 style: const TextStyle(
                   color: Colors.black87,
-                  // Adjusted font size to prevent overflow
-                  fontSize: 22,
+                  fontSize: 28,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 title,
-                style: TextStyle(color: Colors.grey[600], fontSize: 14),
-                // Ensure text does not wrap
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
                 maxLines: 1,
                 overflow: TextOverflow.ellipsis,
               ),
@@ -354,34 +376,33 @@ class _HomeScreenState extends State<HomeScreen> {
         ? Colors.redAccent
         : percentage > 60
         ? Colors.orangeAccent
-        : Colors.tealAccent;
+        : const Color(0xFF5AC8FA); // Using a light blue for normal state
 
     return Container(
-      padding: const EdgeInsets.all(16.0),
+      padding: const EdgeInsets.all(20.0),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20.0),
+        borderRadius: BorderRadius.circular(24.0),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withOpacity(0.1),
-            blurRadius: 10,
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 15,
             offset: const Offset(0, 5),
           ),
         ],
       ),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
-        // Removed MainAxisAlignment.spaceBetween to prevent overflow
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           Container(
-            padding: const EdgeInsets.all(8),
+            padding: const EdgeInsets.all(10),
             decoration: BoxDecoration(
-              color: color.withOpacity(0.15),
-              shape: BoxShape.circle,
+              color: color.withOpacity(0.1),
+              borderRadius: BorderRadius.circular(16),
             ),
-            child: Icon(Icons.speed, color: color, size: 20),
+            child: Icon(Icons.speed_rounded, color: color, size: 24),
           ),
-          const Spacer(), // Added a Spacer to push content to the bottom flexibly
           Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -389,24 +410,29 @@ class _HomeScreenState extends State<HomeScreen> {
                 FileManagementService.formatFileSize(stats.dailyDownloadsUsed),
                 style: const TextStyle(
                   color: Colors.black87,
-                  fontSize: 20,
+                  fontSize: 24,
                   fontWeight: FontWeight.bold,
                 ),
               ),
               const SizedBox(height: 4),
               Text(
                 'Daily Usage',
-                style: TextStyle(color: Colors.grey[600], fontSize: 14),
+                style: TextStyle(
+                  color: Colors.grey[600],
+                  fontSize: 14,
+                  fontWeight: FontWeight.w500,
+                ),
               ),
-              const SizedBox(height: 8),
+              const SizedBox(height: 12),
               TweenAnimationBuilder<double>(
                 tween: Tween(begin: 0, end: percentage / 100),
                 duration: const Duration(milliseconds: 1000),
                 builder: (context, value, child) => LinearProgressIndicator(
                   value: value,
-                  backgroundColor: Colors.grey[300],
+                  backgroundColor: Colors.grey[200],
                   valueColor: AlwaysStoppedAnimation<Color>(color),
                   borderRadius: BorderRadius.circular(10),
+                  minHeight: 6,
                 ),
               ),
             ],
@@ -425,9 +451,9 @@ class _HomeScreenState extends State<HomeScreen> {
           children: [
             Icon(
               _errorMessage!.contains('internet')
-                  ? Icons.wifi_off
-                  : Icons.error_outline,
-              color: Colors.orange[400],
+                  ? Icons.wifi_off_rounded
+                  : Icons.error_outline_rounded,
+              color: Colors.orangeAccent,
               size: 80,
             ),
             const SizedBox(height: 24),
@@ -445,7 +471,7 @@ class _HomeScreenState extends State<HomeScreen> {
               'Pull down to refresh the screen.',
               style: TextStyle(color: Colors.grey[600], fontSize: 14),
             ),
-            const SizedBox(height: 24),
+            const SizedBox(height: 32),
             ElevatedButton.icon(
               onPressed: _loadUserStats,
               style: ElevatedButton.styleFrom(
@@ -453,11 +479,18 @@ class _HomeScreenState extends State<HomeScreen> {
                 foregroundColor: Colors.white,
                 padding: const EdgeInsets.symmetric(
                   horizontal: 24,
-                  vertical: 12,
+                  vertical: 14,
                 ),
+                shape: RoundedRectangleBorder(
+                  borderRadius: BorderRadius.circular(16),
+                ),
+                elevation: 0,
               ),
-              icon: const Icon(Icons.refresh, size: 20),
-              label: const Text('Retry'),
+              icon: const Icon(Icons.refresh_rounded, size: 20),
+              label: const Text(
+                'Retry',
+                style: TextStyle(fontWeight: FontWeight.bold),
+              ),
             ),
           ],
         ),
@@ -485,8 +518,10 @@ class _AnimatedCounter extends StatelessWidget {
     return TweenAnimationBuilder<double>(
       tween: Tween(begin: 0, end: end),
       duration: duration,
+      curve: Curves.easeOut,
       builder: (context, value, child) {
-        final isDecimal = value % 1 != 0;
+        final isDecimal =
+            value % 1 != 0 && end < 100; // Only show decimal for percentages
         final text = isDecimal
             ? value.toStringAsFixed(1)
             : value.toInt().toString();

@@ -53,6 +53,9 @@ class _UploadsScreenState extends State<UploadsScreen> {
       backgroundColor: Colors.white,
       elevation: 0,
       centerTitle: true,
+      leading: null, // Add this line to remove the back button
+      automaticallyImplyLeading:
+          false, // Also add this to ensure no back button
       title: const Text(
         'Upload Files',
         style: TextStyle(
