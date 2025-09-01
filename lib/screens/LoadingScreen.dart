@@ -18,12 +18,15 @@ class _LoadingScreenState extends State<LoadingScreen>
   void initState() {
     super.initState();
 
-    // Set status bar style
+    // Set status bar style for light theme
     SystemChrome.setSystemUIOverlayStyle(
       const SystemUiOverlayStyle(
         statusBarColor: Colors.transparent,
-        statusBarIconBrightness: Brightness.dark,
-        statusBarBrightness: Brightness.light,
+        statusBarIconBrightness:
+            Brightness.dark, // Dark icons on light background
+        statusBarBrightness: Brightness.light, // Light status bar background
+        systemNavigationBarColor: Colors.white, // Light navigation bar
+        systemNavigationBarIconBrightness: Brightness.dark, // Dark nav icons
       ),
     );
 
@@ -89,17 +92,20 @@ class _LoadingScreenState extends State<LoadingScreen>
                   ),
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(20.0),
-                    child: Image.asset(
-                      'assets/icon/loading.png',
-                      fit: BoxFit.contain,
-                      errorBuilder: (context, error, stackTrace) {
-                        // Fallback to icon if image fails to load
-                        return const Icon(
-                          Icons.cloud_upload_outlined,
-                          color: Color(0xFF007AFF),
-                          size: 80.0,
-                        );
-                      },
+                    child: Container(
+                      color: Colors.white, // Ensure white background
+                      child: Image.asset(
+                        'assets/icon/loading.png',
+                        fit: BoxFit.contain,
+                        errorBuilder: (context, error, stackTrace) {
+                          // Fallback to icon if image fails to load
+                          return const Icon(
+                            Icons.cloud_upload_outlined,
+                            color: Color(0xFF007AFF),
+                            size: 80.0,
+                          );
+                        },
+                      ),
                     ),
                   ),
                 ),
